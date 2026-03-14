@@ -251,37 +251,7 @@
             ctx.stroke();
         }
 
-        // ИСПРАВЛЕННАЯ функция для определения выигрыша
-        function getPrize(angle) {
-            // Нормализуем угол от 0 до 2PI
-            const rawAngle = angle % (Math.PI * 2);
-            
-            // Приводим к положительному углу
-            let normalizedAngle = rawAngle;
-            if (normalizedAngle < 0) {
-                normalizedAngle += Math.PI * 2;
-            }
-            
-            // Размер одного сектора
-            const segmentAngle = (Math.PI * 2) / segments.length;
-            
-            // Стрелка указывает вверх (угол -90 градусов или -PI/2)
-            // Нам нужно найти сектор, который находится под стрелкой
-            const arrowAngle = -Math.PI / 2; // Стрелка указывает вверх
-            
-            // Вычисляем угол относительно стрелки
-            let angleFromArrow = (normalizedAngle - arrowAngle + Math.PI * 2) % (Math.PI * 2);
-            
-            // Индекс сектора (0 - первый сектор справа от стрелки)
-            let index = Math.floor(angleFromArrow / segmentAngle);
-            
-            // Защита от выхода за границы
-            if (index >= segments.length) index = segments.length - 1;
-            
-            return segments[index];
-        }
-
-        // Функция вращения
+        // Функция вращения (упрощенная и надежная)
         function spinWheel() {
             if (isSpinning) return;
             
@@ -289,10 +259,25 @@
             resultDiv.style.background = '#00AEEF';
             resultDiv.innerHTML = '🎰 Крутим... 🎰';
             
-            const spinTime = 4000; // 4 секунды
-            const spinAngle = Math.random() * 20 + 15; // 15-35 оборотов
+            // 1. СЛУЧАЙНО ВЫБИРАЕМ ПРИЗ (гарантированно)
+            const prizeIndex = Math.floor(Math.random() * segments.length);
+            const prize = segments[prizeIndex];
+            
+            // 2. Вычисляем угол, на который нужно повернуть колесо,
+            // чтобы выбранный приз оказался под стрелкой
+            const segmentAngle = (Math.PI * 2) / segments.length;
+            
+            // Стрелка указывает вверх (угол -90 градусов или -PI/2)
+            // Нам нужно, чтобы центр выбранного сектора совпал со стрелкой
+            const targetAngle = (-Math.PI / 2) - (prizeIndex * segmentAngle) - (segmentAngle / 2);
+            
+            // 3. Добавляем несколько оборотов для красоты
+            const spins = 5; // Количество полных оборотов
+            const finalAngle = targetAngle - (spins * Math.PI * 2);
+            
             const startTime = Date.now();
             const startAngle = currentAngle;
+            const spinTime = 4000; // 4 секунды
             
             function animateSpin() {
                 const elapsed = Date.now() - startTime;
@@ -300,23 +285,20 @@
                 
                 // Эффект замедления
                 const easeProgress = 1 - Math.pow(1 - progress, 3);
-                currentAngle = startAngle + (spinAngle * Math.PI * 2) * easeProgress;
+                
+                // Плавно двигаемся от начального угла к конечному
+                currentAngle = startAngle + (finalAngle - startAngle) * easeProgress;
                 
                 drawWheel(currentAngle);
                 
                 if (progress < 1) {
                     spinTimeout = requestAnimationFrame(animateSpin);
                 } else {
-                    // Колесо остановилось - определяем приз
-                    const prize = getPrize(currentAngle);
-                    
-                    // Показываем результат
+                    // Колесо остановилось - показываем выбранный приз
                     resultDiv.innerHTML = `🎁 <strong>ТВОЙ ПРИЗ:</strong> ${prize.description}`;
                     resultDiv.style.background = '#EC008C';
                     
-                    // Для отладки - можно убрать потом
-                    console.log('Угол:', currentAngle);
-                    console.log('Приз:', prize.label, prize.description);
+                    console.log('Выпал приз:', prize.label); // Для проверки
                     
                     isSpinning = false;
                 }
