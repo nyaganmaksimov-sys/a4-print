@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00AEEF 0%, #EC008C 50%, #FFF200 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -33,15 +33,17 @@
         }
 
         h1 {
-            color: #333;
+            color: #00AEEF;
             font-size: clamp(1.5rem, 5vw, 2rem);
             margin-bottom: 5px;
+            text-shadow: 2px 2px 0 #FFF200, 4px 4px 0 #EC008C;
         }
 
         .subtitle {
-            color: #666;
+            color: #2D2D2D;
             margin-bottom: 20px;
             font-size: 1.1rem;
+            font-weight: bold;
         }
 
         .wheel-container {
@@ -61,7 +63,7 @@
             cursor: pointer;
         }
 
-        /* Новый стиль для центра с логотипом */
+        /* Центр с логотипом (без кнопки) */
         .spin-center {
             position: absolute;
             top: 50%;
@@ -71,55 +73,34 @@
             height: 100px;
             border-radius: 50%;
             background: white;
-            border: 4px solid #ff6b6b;
+            border: 4px solid #2D2D2D;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 20;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 174, 239, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(0, 174, 239, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 174, 239, 0);
+            }
         }
 
         #centerLogo {
-            width: 40px;
-            height: 40px;
+            width: 70px;
+            height: 70px;
             object-fit: contain;
-            margin-bottom: 2px;
             pointer-events: none;
-        }
-
-        #spinButton {
-            width: 60px;
-            height: 30px;
-            border-radius: 20px;
-            background: #ff6b6b;
-            border: none;
-            color: white;
-            font-weight: bold;
-            font-size: 0.7rem;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            pointer-events: auto;
-            margin-top: 2px;
-        }
-
-        #spinButton:hover {
-            background: #ff5252;
-            transform: scale(1.05);
-        }
-
-        #spinButton:active {
-            transform: scale(0.95);
-        }
-
-        #spinButton:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
+            border-radius: 50%;
         }
 
         /* Адаптивность для маленьких экранов */
@@ -129,18 +110,14 @@
                 height: 70px;
             }
             #centerLogo {
-                width: 30px;
-                height: 30px;
-            }
-            #spinButton {
                 width: 50px;
-                height: 25px;
-                font-size: 0.6rem;
+                height: 50px;
             }
         }
 
         .result-message {
-            background: #f0f0f0;
+            background: #00AEEF;
+            color: white;
             padding: 15px;
             border-radius: 50px;
             font-size: 1.2rem;
@@ -150,7 +127,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px dashed #667eea;
+            border: 3px solid #FFF200;
+            text-shadow: 1px 1px 0 #2D2D2D;
         }
 
         .rules {
@@ -158,11 +136,17 @@
             background: #f9f9f9;
             padding: 15px;
             border-radius: 20px;
-            color: #555;
+            color: #2D2D2D;
+            border-left: 5px solid #EC008C;
+            border-right: 5px solid #00AEEF;
         }
 
         .rules p {
             margin: 8px 0;
+        }
+
+        .rules strong {
+            color: #EC008C;
         }
     </style>
 </head>
@@ -174,37 +158,36 @@
         <div class="wheel-container">
             <canvas id="wheelCanvas" width="500" height="500"></canvas>
             
-            <!-- Центр с логотипом и кнопкой -->
+            <!-- Центр только с логотипом (без кнопки) -->
             <div class="spin-center">
                 <img src="images/logo_soc.png" alt="Логотип" id="centerLogo">
-                <button id="spinButton">КРУТИТЬ!</button>
             </div>
         </div>
 
         <div id="result" class="result-message">
-            Нажми на кнопку, чтобы испытать удачу
+            Нажми на колесо, чтобы испытать удачу
         </div>
         
         <div class="rules">
             <p>✨ <strong>Как получить попытку:</strong> Сделай заказ от 300₽ (или просто приди на открытие) и крути!</p>
             <p>🏆 <strong>Джекпот:</strong> Заказ до 500₽ в подарок!</p>
+            <p>🎨 <strong>Фирменные цвета CMYK:</strong> Голубой, Пурпурный, Жёлтый, Чёрный</p>
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
-        const spinButton = document.getElementById('spinButton');
         const resultDiv = document.getElementById('result');
 
-        // Настройки секторов (Цвета и призы)
+        // Настройки секторов в цветах CMYK
         const segments = [
-            { label: '10%', description: 'Скидка 10% на этот заказ!', color: '#FF6B6B' },
-            { label: '20%', description: 'Скидка 20% на этот заказ!', color: '#4ECDC4' },
-            { label: '5 Фото', description: '+5 фото 10x15 в подарок!', color: '#45B7D1' },
-            { label: 'Ламинация', description: 'Ламинирование в подарок!', color: '#96CEB4' },
-            { label: '30% след.', description: 'Купон: 30% на следующий заказ!', color: '#FFE194' },
-            { label: 'ДЖЕКПОТ', description: '🎉 ЗАКАЗ БЕСПЛАТНО (до 500₽)! 🎉', color: '#F7D794' }
+            { label: '10%', description: 'Скидка 10% на этот заказ!', color: '#00AEEF' }, // Cyan
+            { label: '20%', description: 'Скидка 20% на этот заказ!', color: '#EC008C' }, // Magenta
+            { label: '5 Фото', description: '+5 фото 10x15 в подарок!', color: '#FFF200' }, // Yellow
+            { label: 'Ламинация', description: 'Ламинирование в подарок!', color: '#2D2D2D' }, // Black
+            { label: '30% след.', description: 'Купон: 30% на следующий заказ!', color: '#00AEEF' }, // Cyan
+            { label: 'ДЖЕКПОТ', description: '🎉 ЗАКАЗ БЕСПЛАТНО (до 500₽)! 🎉', color: '#EC008C' } // Magenta
         ];
 
         let currentAngle = 0;
@@ -238,33 +221,36 @@
                 ctx.closePath();
                 ctx.stroke();
                 
-                // Добавляем текст
+                // Добавляем текст (белый на темных фонах, черный на светлых)
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(startAngle + arc / 2);
                 ctx.textAlign = 'center';
-                ctx.fillStyle = '#000';
-                ctx.font = 'bold ' + (canvas.width / 20) + 'px "Segoe UI"';
+                
+                // Выбираем цвет текста в зависимости от фона
+                if (segments[i].color === '#2D2D2D' || segments[i].color === '#EC008C') {
+                    ctx.fillStyle = '#FFFFFF';
+                } else {
+                    ctx.fillStyle = '#000000';
+                }
+                
+                ctx.font = 'bold ' + (canvas.width / 18) + 'px "Segoe UI"';
                 ctx.fillText(segments[i].label, canvas.width / 4, 10);
                 ctx.restore();
             }
             
-            // Рисуем центральный круг (будет скрыт логотипом, но оставим для красоты)
-            ctx.beginPath();
-            ctx.fillStyle = '#333';
-            ctx.arc(canvas.width / 2, canvas.height / 2, 20, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            
-            // Рисуем указатель (стрелку сверху)
-            ctx.fillStyle = '#ff0';
+            // Рисуем указатель (стрелку сверху) в цвете Magenta
+            ctx.fillStyle = '#EC008C';
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2 - 15, 5);
             ctx.lineTo(canvas.width / 2, 25);
             ctx.lineTo(canvas.width / 2 + 15, 5);
             ctx.fill();
+            
+            // Обводка стрелки
+            ctx.strokeStyle = '#FFF200';
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
 
         // Функция для определения выигрыша
@@ -274,7 +260,6 @@
             
             let index = Math.floor(((Math.PI * 2) - rawAngle) / segmentAngle) % segments.length;
             
-            // Корректировка для правильного сектора
             if (rawAngle < 0.1) index = 0;
             if (index < 0) index = segments.length - 1;
             
@@ -286,9 +271,7 @@
             if (isSpinning) return;
             
             isSpinning = true;
-            spinButton.disabled = true;
-            resultDiv.style.background = '#f0f0f0';
-            resultDiv.style.border = '2px dashed #667eea';
+            resultDiv.style.background = '#00AEEF';
             resultDiv.innerHTML = '🎰 Крутим... 🎰';
             
             const spinTime = 4000;
@@ -309,12 +292,10 @@
                     spinTimeout = requestAnimationFrame(animateSpin);
                 } else {
                     isSpinning = false;
-                    spinButton.disabled = false;
                     
                     const prize = getPrize(currentAngle);
                     resultDiv.innerHTML = `🎁 <strong>ТВОЙ ПРИЗ:</strong> ${prize.description}`;
-                    resultDiv.style.background = '#d4edda';
-                    resultDiv.style.border = '2px solid #28a745';
+                    resultDiv.style.background = '#EC008C';
                 }
             }
             
@@ -324,8 +305,7 @@
         // Инициализация
         drawWheel(currentAngle);
 
-        // Слушаем клик по кнопке и по canvas (для удобства)
-        spinButton.addEventListener('click', spinWheel);
+        // Клик по canvas для вращения
         canvas.addEventListener('click', spinWheel);
 
         // Адаптивность при изменении размера окна
@@ -333,11 +313,12 @@
             drawWheel(currentAngle);
         });
 
-        // Проверка загрузки логотипа (если файл не найден)
+        // Проверка загрузки логотипа
         const logo = document.getElementById('centerLogo');
         logo.onerror = function() {
             console.log('Логотип не загружен, проверьте путь images/logo_soc.png');
-            // Можно показать заглушку или просто скрыть ошибку
+            // Заглушка если логотип не найден
+            this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%2300AEEF"/><text x="50" y="70" font-size="50" text-anchor="middle" fill="white">A4</text></svg>';
         };
     </script>
 </body>
