@@ -189,6 +189,7 @@
             { label: 'ДЖЕКПОТ', description: '🎉 ЗАКАЗ БЕСПЛАТНО (до 500₽)! 🎉', color: '#EC008C' }
         ];
 
+        // ФИКСИРОВАННЫЙ начальный угол (всегда начинаем с одной точки)
         let currentAngle = 0;
         let isSpinning = false;
         let spinTimeout = null;
@@ -251,7 +252,7 @@
             ctx.stroke();
         }
 
-        // Функция вращения (упрощенная и надежная)
+        // Функция вращения (УЛУЧШЕННАЯ - каждый раз сбрасываем угол)
         function spinWheel() {
             if (isSpinning) return;
             
@@ -259,34 +260,37 @@
             resultDiv.style.background = '#00AEEF';
             resultDiv.innerHTML = '🎰 Крутим... 🎰';
             
-            // 1. СЛУЧАЙНО ВЫБИРАЕМ ПРИЗ (гарантированно)
+            // 1. Случайно выбираем приз
             const prizeIndex = Math.floor(Math.random() * segments.length);
             const prize = segments[prizeIndex];
             
-            // 2. Вычисляем угол, на который нужно повернуть колесо,
-            // чтобы выбранный приз оказался под стрелкой
+            // 2. Вычисляем угол для этого приза
             const segmentAngle = (Math.PI * 2) / segments.length;
             
-            // Стрелка указывает вверх (угол -90 градусов или -PI/2)
-            // Нам нужно, чтобы центр выбранного сектора совпал со стрелкой
+            // Стрелка вверх (-PI/2). Нужно, чтобы центр сектора был под стрелкой
             const targetAngle = (-Math.PI / 2) - (prizeIndex * segmentAngle) - (segmentAngle / 2);
             
-            // 3. Добавляем несколько оборотов для красоты
-            const spins = 5; // Количество полных оборотов
+            // 3. Добавляем много оборотов для красоты (8-12 оборотов)
+            const spins = Math.floor(Math.random() * 5) + 8; // 8-12 оборотов
             const finalAngle = targetAngle - (spins * Math.PI * 2);
             
+            // 4. ВАЖНО: начинаем всегда с 0 (фиксированная точка)
+            const startAngle = 0;
             const startTime = Date.now();
-            const startAngle = currentAngle;
             const spinTime = 4000; // 4 секунды
+            
+            // Устанавливаем начальный угол в 0 перед вращением
+            currentAngle = startAngle;
+            drawWheel(currentAngle);
             
             function animateSpin() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / spinTime, 1);
                 
-                // Эффект замедления
+                // Эффект замедления (ease-out)
                 const easeProgress = 1 - Math.pow(1 - progress, 3);
                 
-                // Плавно двигаемся от начального угла к конечному
+                // Плавно двигаемся от 0 к конечному углу
                 currentAngle = startAngle + (finalAngle - startAngle) * easeProgress;
                 
                 drawWheel(currentAngle);
@@ -294,11 +298,11 @@
                 if (progress < 1) {
                     spinTimeout = requestAnimationFrame(animateSpin);
                 } else {
-                    // Колесо остановилось - показываем выбранный приз
+                    // Колесо остановилось - показываем приз
                     resultDiv.innerHTML = `🎁 <strong>ТВОЙ ПРИЗ:</strong> ${prize.description}`;
                     resultDiv.style.background = '#EC008C';
                     
-                    console.log('Выпал приз:', prize.label); // Для проверки
+                    console.log('Выпал приз:', prize.label, 'Оборотов:', spins);
                     
                     isSpinning = false;
                 }
@@ -307,8 +311,8 @@
             animateSpin();
         }
 
-        // Инициализация
-        drawWheel(currentAngle);
+        // Инициализация - начинаем с угла 0
+        drawWheel(0);
 
         // Клик по canvas для вращения
         canvas.addEventListener('click', spinWheel);
