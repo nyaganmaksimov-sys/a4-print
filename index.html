@@ -63,7 +63,7 @@
             cursor: pointer;
         }
 
-        /* Центр с логотипом (без кнопки) */
+        /* Центр с логотипом */
         .spin-center {
             position: absolute;
             top: 50%;
@@ -103,7 +103,6 @@
             border-radius: 50%;
         }
 
-        /* Адаптивность для маленьких экранов */
         @media (max-width: 400px) {
             .spin-center {
                 width: 70px;
@@ -158,7 +157,7 @@
         <div class="wheel-container">
             <canvas id="wheelCanvas" width="500" height="500"></canvas>
             
-            <!-- Центр только с логотипом (без кнопки) -->
+            <!-- Центр только с логотипом -->
             <div class="spin-center">
                 <img src="images/logo_soc.png" alt="Логотип" id="centerLogo">
             </div>
@@ -180,14 +179,14 @@
         const ctx = canvas.getContext('2d');
         const resultDiv = document.getElementById('result');
 
-        // Настройки секторов в цветах CMYK
+        // Настройки секторов
         const segments = [
-            { label: '10%', description: 'Скидка 10% на этот заказ!', color: '#00AEEF' }, // Cyan
-            { label: '20%', description: 'Скидка 20% на этот заказ!', color: '#EC008C' }, // Magenta
-            { label: '5 Фото', description: '+5 фото 10x15 в подарок!', color: '#FFF200' }, // Yellow
-            { label: 'Ламинация', description: 'Ламинирование в подарок!', color: '#2D2D2D' }, // Black
-            { label: '30% след.', description: 'Купон: 30% на следующий заказ!', color: '#00AEEF' }, // Cyan
-            { label: 'ДЖЕКПОТ', description: '🎉 ЗАКАЗ БЕСПЛАТНО (до 500₽)! 🎉', color: '#EC008C' } // Magenta
+            { label: '10%', description: 'Скидка 10% на этот заказ!', color: '#00AEEF' },
+            { label: '20%', description: 'Скидка 20% на этот заказ!', color: '#EC008C' },
+            { label: '5 Фото', description: '+5 фото 10x15 в подарок!', color: '#FFF200' },
+            { label: 'Ламинация', description: 'Ламинирование в подарок!', color: '#2D2D2D' },
+            { label: '30% след.', description: 'Купон: 30% на следующий заказ!', color: '#00AEEF' },
+            { label: 'ДЖЕКПОТ', description: '🎉 ЗАКАЗ БЕСПЛАТНО (до 500₽)! 🎉', color: '#EC008C' }
         ];
 
         let currentAngle = 0;
@@ -221,13 +220,13 @@
                 ctx.closePath();
                 ctx.stroke();
                 
-                // Добавляем текст (белый на темных фонах, черный на светлых)
+                // Добавляем текст
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(startAngle + arc / 2);
                 ctx.textAlign = 'center';
                 
-                // Выбираем цвет текста в зависимости от фона
+                // Выбираем цвет текста
                 if (segments[i].color === '#2D2D2D' || segments[i].color === '#EC008C') {
                     ctx.fillStyle = '#FFFFFF';
                 } else {
@@ -239,7 +238,7 @@
                 ctx.restore();
             }
             
-            // Рисуем указатель (стрелку сверху) в цвете Magenta
+            // Рисуем указатель (стрелку сверху)
             ctx.fillStyle = '#EC008C';
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2 - 15, 5);
@@ -247,21 +246,37 @@
             ctx.lineTo(canvas.width / 2 + 15, 5);
             ctx.fill();
             
-            // Обводка стрелки
             ctx.strokeStyle = '#FFF200';
             ctx.lineWidth = 2;
             ctx.stroke();
         }
 
-        // Функция для определения выигрыша
+        // ИСПРАВЛЕННАЯ функция для определения выигрыша
         function getPrize(angle) {
+            // Нормализуем угол от 0 до 2PI
             const rawAngle = angle % (Math.PI * 2);
+            
+            // Приводим к положительному углу
+            let normalizedAngle = rawAngle;
+            if (normalizedAngle < 0) {
+                normalizedAngle += Math.PI * 2;
+            }
+            
+            // Размер одного сектора
             const segmentAngle = (Math.PI * 2) / segments.length;
             
-            let index = Math.floor(((Math.PI * 2) - rawAngle) / segmentAngle) % segments.length;
+            // Стрелка указывает вверх (угол -90 градусов или -PI/2)
+            // Нам нужно найти сектор, который находится под стрелкой
+            const arrowAngle = -Math.PI / 2; // Стрелка указывает вверх
             
-            if (rawAngle < 0.1) index = 0;
-            if (index < 0) index = segments.length - 1;
+            // Вычисляем угол относительно стрелки
+            let angleFromArrow = (normalizedAngle - arrowAngle + Math.PI * 2) % (Math.PI * 2);
+            
+            // Индекс сектора (0 - первый сектор справа от стрелки)
+            let index = Math.floor(angleFromArrow / segmentAngle);
+            
+            // Защита от выхода за границы
+            if (index >= segments.length) index = segments.length - 1;
             
             return segments[index];
         }
@@ -274,8 +289,8 @@
             resultDiv.style.background = '#00AEEF';
             resultDiv.innerHTML = '🎰 Крутим... 🎰';
             
-            const spinTime = 4000;
-            const spinAngle = Math.random() * 20 + 15;
+            const spinTime = 4000; // 4 секунды
+            const spinAngle = Math.random() * 20 + 15; // 15-35 оборотов
             const startTime = Date.now();
             const startAngle = currentAngle;
             
@@ -283,6 +298,7 @@
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / spinTime, 1);
                 
+                // Эффект замедления
                 const easeProgress = 1 - Math.pow(1 - progress, 3);
                 currentAngle = startAngle + (spinAngle * Math.PI * 2) * easeProgress;
                 
@@ -291,11 +307,18 @@
                 if (progress < 1) {
                     spinTimeout = requestAnimationFrame(animateSpin);
                 } else {
-                    isSpinning = false;
-                    
+                    // Колесо остановилось - определяем приз
                     const prize = getPrize(currentAngle);
+                    
+                    // Показываем результат
                     resultDiv.innerHTML = `🎁 <strong>ТВОЙ ПРИЗ:</strong> ${prize.description}`;
                     resultDiv.style.background = '#EC008C';
+                    
+                    // Для отладки - можно убрать потом
+                    console.log('Угол:', currentAngle);
+                    console.log('Приз:', prize.label, prize.description);
+                    
+                    isSpinning = false;
                 }
             }
             
@@ -308,16 +331,15 @@
         // Клик по canvas для вращения
         canvas.addEventListener('click', spinWheel);
 
-        // Адаптивность при изменении размера окна
+        // Адаптивность
         window.addEventListener('resize', () => {
             drawWheel(currentAngle);
         });
 
-        // Проверка загрузки логотипа
+        // Проверка логотипа
         const logo = document.getElementById('centerLogo');
         logo.onerror = function() {
             console.log('Логотип не загружен, проверьте путь images/logo_soc.png');
-            // Заглушка если логотип не найден
             this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%2300AEEF"/><text x="50" y="70" font-size="50" text-anchor="middle" fill="white">A4</text></svg>';
         };
     </script>
