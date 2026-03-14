@@ -32,11 +32,14 @@
             width: 100%;
         }
 
+        /* ЗАГОЛОВОК ОДНИМ ЦВЕТОМ (фирменный голубой) */
         h1 {
-            color: #00AEEF;
+            color: #00AEEF; /* Один цвет - CMYK Cyan */
             font-size: clamp(1.5rem, 5vw, 2rem);
             margin-bottom: 5px;
-            text-shadow: 2px 2px 0 #FFF200, 4px 4px 0 #EC008C;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .subtitle {
@@ -151,7 +154,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎉 А4-ПРИНТ ДАРИТ СКИДКИ! 🎉</h1>
+        <!-- НОВЫЙ ЗАГОЛОВОК ОДНИМ ЦВЕТОМ -->
+        <h1>А4-ПРИНТ ДАРИТ СКИДКИ</h1>
         <p class="subtitle">Крути барабан и забирай приз!</p>
 
         <div class="wheel-container">
@@ -171,7 +175,8 @@
             <p>🎁 <strong>Скидки от 5% до 50%:</strong> Крути и выигрывай!</p>
             <p>🖼 <strong>Рамочки в подарок:</strong> Фоторамка или рамка с вашим фото</p>
             <p>🏆 <strong>Джекпот:</strong> Скидка 50% на весь заказ!</p>
-             </div>
+            <p>🎨 <strong>Фирменные цвета CMYK:</strong> Голубой, Пурпурный, Жёлтый, Чёрный</p>
+        </div>
     </div>
 
     <script>
@@ -179,71 +184,70 @@
         const ctx = canvas.getContext('2d');
         const resultDiv = document.getElementById('result');
 
-        // НОВЫЕ НАСТРОЙКИ СЕКТОРОВ (только скидки + рамочки)
+        // НАСТРОЙКИ СЕКТОРОВ
         const segments = [
             { 
                 label: '5%', 
                 description: '🎁 Скидка 5% на текущий заказ!', 
-                color: '#FFB6C1', // Светло-розовый
+                color: '#FFB6C1',
                 emoji: '🎁'
             },
             { 
                 label: '10%', 
                 description: '🎁 Скидка 10% на текущий заказ!', 
-                color: '#FFD700', // Золотой
+                color: '#FFD700',
                 emoji: '🎁'
             },
             { 
                 label: '15%', 
                 description: '🎁 Скидка 15% на текущий заказ!', 
-                color: '#98FB98', // Салатовый
+                color: '#98FB98',
                 emoji: '🎁'
             },
             { 
                 label: '20%', 
                 description: '🎁 Скидка 20% на текущий заказ!', 
-                color: '#87CEEB', // Небесно-голубой
+                color: '#87CEEB',
                 emoji: '🎁'
             },
             { 
                 label: '25%', 
                 description: '🎁 Скидка 25% на текущий заказ!', 
-                color: '#DDA0DD', // Сливовый
+                color: '#DDA0DD',
                 emoji: '🎁'
             },
             { 
                 label: '30%', 
                 description: '🎁 Скидка 30% на текущий заказ!', 
-                color: '#F0E68C', // Хаки
+                color: '#F0E68C',
                 emoji: '🎁'
             },
             { 
                 label: '40%', 
                 description: '🎁 Скидка 40% на текущий заказ!', 
-                color: '#FFA07A', // Светло-лососевый
+                color: '#FFA07A',
                 emoji: '🎁'
             },
             { 
                 label: '50%', 
                 description: '🏆 ДЖЕКПОТ: Скидка 50% на заказ! 🏆', 
-                color: '#FF4500', // Оранжево-красный (яркий)
+                color: '#FF4500',
                 emoji: '🏆'
             },
             { 
-                label: 'РАМКА', 
-                description: 'РАМОЧКА ДЛЯ ФОТО в подарок + скидка 10% на фотоуслуги!', 
-                color: '#00AEEF', // Голубой (CMYK)
-                emoji: ''
+                label: '🖼 РАМКА', 
+                description: '🖼 РАМОЧКА ДЛЯ ФОТО в подарок + скидка 10% на фотоуслуги!', 
+                color: '#00AEEF',
+                emoji: '🖼'
             },
             { 
-                label: 'ФОТО', 
-                description: 'РАМОЧКА с вашим снимком! Мы печатаем фото и дарим в рамке', 
-                color: '#EC008C', // Пурпурный (CMYK)
-                emoji: ''
+                label: '🖼 ФОТО', 
+                description: '🖼 РАМОЧКА с вашим снимком! Мы печатаем фото и дарим в рамке', 
+                color: '#EC008C',
+                emoji: '🖼'
             }
         ];
 
-        // ФИКСИРОВАННЫЙ начальный угол
         let currentAngle = 0;
         let isSpinning = false;
         let spinTimeout = null;
@@ -266,7 +270,7 @@
                 ctx.closePath();
                 ctx.fill();
                 
-                // Рисуем обводку (белые разделители)
+                // Рисуем обводку
                 ctx.strokeStyle = '#fff';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
