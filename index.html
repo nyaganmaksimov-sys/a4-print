@@ -32,7 +32,6 @@
             width: 100%;
         }
 
-        /* ЗАГОЛОВОК ОДНИМ ЦВЕТОМ */
         h1 {
             color: #00AEEF;
             font-size: clamp(1.5rem, 5vw, 2rem);
@@ -66,7 +65,6 @@
             cursor: pointer;
         }
 
-        /* Центр с логотипом */
         .spin-center {
             position: absolute;
             top: 50%;
@@ -160,7 +158,6 @@
         <div class="wheel-container">
             <canvas id="wheelCanvas" width="500" height="500"></canvas>
             
-            <!-- Центр только с логотипом -->
             <div class="spin-center">
                 <img src="images/logo_soc.png" alt="Логотип" id="centerLogo">
             </div>
@@ -174,6 +171,8 @@
             <p>🎁 <strong>Скидки от 5% до 50%:</strong> Крути и выигрывай!</p>
             <p>🖼️ <strong>Рамочки в подарок:</strong> Фоторамка или рамка с вашим фото</p>
             <p>🏆 <strong>Джекпот:</strong> Скидка 50% на весь заказ!</p>
+            <p>🎨 <strong>Фирменные цвета CMYK:</strong> Голубой, Пурпурный, Жёлтый, Чёрный</p>
+            <p>🔄 <strong>Каждый второй прокрут:</strong> Гарантированная скидка 5%</p>
         </div>
     </div>
 
@@ -182,7 +181,7 @@
         const ctx = canvas.getContext('2d');
         const resultDiv = document.getElementById('result');
 
-        // НАСТРОЙКИ СЕКТОРОВ - ТОЛЬКО ТЕКСТ
+        // НАСТРОЙКИ СЕКТОРОВ
         const segments = [
             { 
                 label: '5%', 
@@ -239,6 +238,9 @@
         let currentAngle = 0;
         let isSpinning = false;
         let spinTimeout = null;
+        
+        // НОВАЯ ПЕРЕМЕННАЯ ДЛЯ СЧЕТЧИКА ПРОКРУТОВ
+        let spinCounter = 0;
 
         // Рисуем колесо
         function drawWheel(angle) {
@@ -250,7 +252,6 @@
                 const startAngle = i * arc + angle;
                 const endAngle = (i + 1) * arc + angle;
                 
-                // Рисуем сектор
                 ctx.beginPath();
                 ctx.fillStyle = segments[i].color;
                 ctx.moveTo(canvas.width / 2, canvas.height / 2);
@@ -258,7 +259,6 @@
                 ctx.closePath();
                 ctx.fill();
                 
-                // Рисуем обводку
                 ctx.strokeStyle = '#fff';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -267,20 +267,17 @@
                 ctx.closePath();
                 ctx.stroke();
                 
-                // Добавляем текст
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(startAngle + arc / 2);
                 ctx.textAlign = 'center';
                 
-                // Выбираем цвет текста
                 if (segments[i].color === '#2D2D2D' || segments[i].color === '#EC008C' || segments[i].color === '#FF4500') {
                     ctx.fillStyle = '#FFFFFF';
                 } else {
                     ctx.fillStyle = '#000000';
                 }
                 
-                // Уменьшаем шрифт для длинных надписей
                 if (segments[i].label === 'ФОТО+РАМКА') {
                     ctx.font = 'bold ' + (canvas.width / 24) + 'px "Segoe UI"';
                 } else {
@@ -291,7 +288,6 @@
                 ctx.restore();
             }
             
-            // Рисуем указатель (стрелку сверху)
             ctx.fillStyle = '#EC008C';
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2 - 15, 5);
@@ -304,7 +300,7 @@
             ctx.stroke();
         }
 
-        // Функция вращения
+        // Функция вращения с гарантированной 5% на каждый второй прокрут
         function spinWheel() {
             if (isSpinning) return;
             
@@ -312,24 +308,35 @@
             resultDiv.style.background = '#00AEEF';
             resultDiv.innerHTML = '🎰 Крутим... 🎰';
             
-            // Случайно выбираем приз
-            const prizeIndex = Math.floor(Math.random() * segments.length);
+            // Увеличиваем счетчик прокрутов
+            spinCounter++;
+            
+            // НОВАЯ ЛОГИКА: каждый второй прокрут - гарантированная 5%
+            let prizeIndex;
+            
+            if (spinCounter % 2 === 0) {
+                // Четный прокрут (2, 4, 6...) - гарантированная скидка 5% (индекс 0)
+                prizeIndex = 0;
+                console.log('Гарантированная 5% (прокрут #' + spinCounter + ')');
+            } else {
+                // Нечетный прокрут - случайный приз
+                prizeIndex = Math.floor(Math.random() * segments.length);
+                console.log('Случайный приз (прокрут #' + spinCounter + ')');
+            }
+            
             const prize = segments[prizeIndex];
             
             // Вычисляем угол для этого приза
             const segmentAngle = (Math.PI * 2) / segments.length;
-            
-            // Стрелка вверх (-PI/2). Нужно, чтобы центр сектора был под стрелкой
             const targetAngle = (-Math.PI / 2) - (prizeIndex * segmentAngle) - (segmentAngle / 2);
             
-            // Добавляем случайное количество оборотов (8-12)
+            // Добавляем случайное количество оборотов
             const spins = Math.floor(Math.random() * 5) + 8;
             const finalAngle = targetAngle - (spins * Math.PI * 2);
             
-            // Начинаем всегда с 0
             const startAngle = 0;
             const startTime = Date.now();
-            const spinTime = 4000; // 4 секунды
+            const spinTime = 4000;
             
             currentAngle = startAngle;
             drawWheel(currentAngle);
@@ -338,7 +345,6 @@
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / spinTime, 1);
                 
-                // Эффект замедления
                 const easeProgress = 1 - Math.pow(1 - progress, 3);
                 
                 currentAngle = startAngle + (finalAngle - startAngle) * easeProgress;
@@ -348,11 +354,8 @@
                 if (progress < 1) {
                     spinTimeout = requestAnimationFrame(animateSpin);
                 } else {
-                    // Показываем приз
                     resultDiv.innerHTML = `🎁 <strong>ТВОЙ ПРИЗ:</strong> ${prize.description}`;
                     resultDiv.style.background = '#EC008C';
-                    
-                    console.log('Выпал приз:', prize.label);
                     
                     isSpinning = false;
                 }
@@ -361,18 +364,13 @@
             animateSpin();
         }
 
-        // Инициализация
         drawWheel(0);
-
-        // Клик по canvas для вращения
         canvas.addEventListener('click', spinWheel);
 
-        // Адаптивность
         window.addEventListener('resize', () => {
             drawWheel(currentAngle);
         });
 
-        // Проверка логотипа
         const logo = document.getElementById('centerLogo');
         logo.onerror = function() {
             console.log('Логотип не загружен, проверьте путь images/logo_soc.png');
