@@ -75,7 +75,7 @@
             z-index: 10;
             background: white;
             padding: 40px;
-            border-radius: 0; /* Убрал скругление */
+            border-radius: 0;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
@@ -84,6 +84,9 @@
             flex: 1;
             max-width: 500px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         /* ЛОГОТИП ПО ЦЕНТРУ НАД КОЛЕСОМ */
@@ -100,7 +103,7 @@
         .top-logo-image {
             max-width: 200px;
             height: auto;
-            border-radius: 0; /* Убрал скругление */
+            border-radius: 0;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         }
@@ -164,8 +167,9 @@
             width: 100%;
             height: auto;
             display: block;
-            border-radius: 0; /* Убрал скругление */
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(0,174,239,0.3);
+            border-radius: 0;
+            /* УБРАЛ ОКОНТОВКУ */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
             cursor: pointer;
             background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0);
@@ -177,16 +181,16 @@
             filter: grayscale(50%);
             cursor: not-allowed;
             animation: none;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(128,128,128,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
         @keyframes rotateGlow {
-            0% { box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(0,174,239,0.3); }
-            50% { box-shadow: 0 25px 50px rgba(236,0,140,0.4), 0 0 0 6px rgba(255,255,255,0.6), 0 0 0 10px rgba(236,0,140,0.3); }
-            100% { box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(0,174,239,0.3); }
+            0% { box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+            50% { box-shadow: 0 25px 50px rgba(236,0,140,0.4); }
+            100% { box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         }
 
-        /* Центр колеса с логотипом (без скругления) */
+        /* Центр колеса с логотипом */
         .spin-center {
             position: absolute;
             top: 50%;
@@ -200,19 +204,19 @@
             align-items: center;
             justify-content: center;
             z-index: 20;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 0 3px rgba(255,255,255,0.8) inset, 0 0 0 5px rgba(0,174,239,0.3);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
             pointer-events: none;
             animation: pulse3D 2s ease-in-out infinite;
-            border-radius: 0; /* Убрал скругление */
+            border-radius: 0;
         }
 
         @keyframes pulse3D {
             0%, 100% { 
-                box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 0 3px rgba(255,255,255,0.8) inset, 0 0 0 5px rgba(0,174,239,0.3);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.3);
                 transform: translate(-50%, -50%) scale(1);
             }
             50% { 
-                box-shadow: 0 15px 30px rgba(236,0,140,0.4), 0 0 0 4px rgba(255,255,255,0.9) inset, 0 0 0 8px rgba(236,0,140,0.3);
+                box-shadow: 0 15px 30px rgba(236,0,140,0.4);
                 transform: translate(-50%, -50%) scale(1.05);
             }
         }
@@ -222,11 +226,11 @@
             height: 70px;
             object-fit: contain;
             pointer-events: none;
-            border-radius: 0; /* Убрал скругление */
+            border-radius: 0;
             filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
         }
 
-        /* ПРАВАЯ ЧАСТЬ - БАННЕР ТАКОГО ЖЕ РАЗМЕРА */
+        /* ПРАВАЯ ЧАСТЬ - БАННЕР */
         .right-section {
             flex: 1;
             max-width: 500px;
@@ -238,6 +242,8 @@
         .banner-container {
             width: 100%;
             animation: bannerFloat 4s ease-in-out infinite;
+            display: flex;
+            justify-content: center;
         }
 
         @keyframes bannerFloat {
@@ -249,15 +255,16 @@
             width: 100%;
             height: auto;
             display: block;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(236,0,140,0.3);
+            /* УБРАЛ ОКОНТОВКУ */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
             cursor: pointer;
-            border-radius: 0; /* Убрал скругление */
+            border-radius: 0;
         }
 
         .banner-image:hover {
             transform: scale(1.02);
-            box-shadow: 0 25px 50px rgba(0,174,239,0.4), 0 0 0 6px rgba(255,255,255,0.6), 0 0 0 10px rgba(0,174,239,0.3);
+            box-shadow: 0 25px 50px rgba(0,174,239,0.4);
         }
 
         /* РЕЗУЛЬТАТ И ТАЙМЕР ПОД КОЛЕСОМ */
@@ -274,15 +281,15 @@
             justify-content: center;
             border: 3px solid #FFF200;
             text-shadow: 2px 2px 0 #2D2D2D;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 0 2px rgba(255,255,255,0.5) inset;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             animation: resultGlow 2s ease-in-out infinite;
             transition: all 0.3s ease;
-            border-radius: 0; /* Убрал скругление */
+            border-radius: 0;
         }
 
         @keyframes resultGlow {
-            0%, 100% { box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 0 2px rgba(255,255,255,0.5) inset; }
-            50% { box-shadow: 0 15px 30px rgba(255,242,0,0.3), 0 0 0 3px rgba(255,255,255,0.8) inset; }
+            0%, 100% { box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+            50% { box-shadow: 0 15px 30px rgba(255,242,0,0.3); }
         }
 
         .timer {
@@ -309,7 +316,7 @@
             border-right: 5px solid #00AEEF;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             animation: slideIn 0.8s ease-out;
-            border-radius: 0; /* Убрал скругление */
+            border-radius: 0;
         }
 
         @keyframes slideIn {
@@ -384,7 +391,7 @@
             </div>
         </div>
 
-        <!-- ПРАВАЯ ЧАСТЬ - БАННЕР ТАКОГО ЖЕ РАЗМЕРА -->
+        <!-- ПРАВАЯ ЧАСТЬ - БАННЕР -->
         <div class="right-section">
             <div class="banner-container">
                 <img src="banner.png" alt="Баннер акции" class="banner-image" onclick="window.open('https://a4-print.ru', '_blank')">
