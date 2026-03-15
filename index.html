@@ -75,57 +75,18 @@
             z-index: 10;
             background: white;
             padding: 40px;
-            border-radius: 50px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-            animation: wrapperFloat 4s ease-in-out infinite;
-            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 0; /* Убрал скругление */
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
-        @keyframes wrapperFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        /* СТИЛИ ДЛЯ БАННЕРА (ТЕПЕРЬ ОДИНАКОВОГО РАЗМЕРА С КОЛЕСОМ) */
-        .banner-left {
-            flex: 0 0 500px; /* Такой же размер как у колеса */
+        /* ЛЕВАЯ ЧАСТЬ - КОЛЕСО */
+        .left-section {
+            flex: 1;
             max-width: 500px;
-            animation: bannerFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes bannerFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(1deg); }
-        }
-
-        .banner-image {
-            width: 100%;
-            height: auto;
-            border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(0,174,239,0.3);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: block;
-            aspect-ratio: 1 / 1; /* Квадратное соотношение как у колеса */
-            object-fit: cover;
-        }
-
-        .banner-image:hover {
-            transform: scale(1.05) rotate(2deg);
-            box-shadow: 0 25px 50px rgba(236,0,140,0.4), 0 0 0 6px rgba(255,255,255,0.6), 0 0 0 10px rgba(236,0,140,0.3);
-        }
-
-        /* ОСНОВНОЙ КОНТЕЙНЕР С КОЛЕСОМ */
-        .container {
             text-align: center;
-            background: transparent; /* Убираем фон, так как основной фон белый */
-            padding: 0;
-            border-radius: 30px;
-            max-width: 500px;
-            width: 100%;
-            position: relative;
         }
 
+        /* ЛОГОТИП ПО ЦЕНТРУ НАД КОЛЕСОМ */
         .top-logo {
             margin-bottom: 20px;
             animation: logoFloat 3s ease-in-out infinite;
@@ -139,7 +100,7 @@
         .top-logo-image {
             max-width: 200px;
             height: auto;
-            border-radius: 15px;
+            border-radius: 0; /* Убрал скругление */
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         }
@@ -152,7 +113,7 @@
         h1 {
             color: #00AEEF;
             font-size: clamp(1.5rem, 5vw, 2rem);
-            margin: 10px 0 5px;
+            margin: 20px 0 5px;
             font-weight: 800;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -203,7 +164,7 @@
             width: 100%;
             height: auto;
             display: block;
-            border-radius: 50%;
+            border-radius: 0; /* Убрал скругление */
             box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(0,174,239,0.3);
             transition: all 0.3s ease;
             cursor: pointer;
@@ -225,7 +186,7 @@
             100% { box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(0,174,239,0.3); }
         }
 
-        /* Объемный центр с логотипом */
+        /* Центр колеса с логотипом (без скругления) */
         .spin-center {
             position: absolute;
             top: 50%;
@@ -233,7 +194,6 @@
             transform: translate(-50%, -50%);
             width: 100px;
             height: 100px;
-            border-radius: 50%;
             background: linear-gradient(145deg, #ffffff, #e0e0e0);
             border: 4px solid #2D2D2D;
             display: flex;
@@ -243,6 +203,7 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 0 3px rgba(255,255,255,0.8) inset, 0 0 0 5px rgba(0,174,239,0.3);
             pointer-events: none;
             animation: pulse3D 2s ease-in-out infinite;
+            border-radius: 0; /* Убрал скругление */
         }
 
         @keyframes pulse3D {
@@ -261,15 +222,49 @@
             height: 70px;
             object-fit: contain;
             pointer-events: none;
-            border-radius: 50%;
+            border-radius: 0; /* Убрал скругление */
             filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
         }
 
+        /* ПРАВАЯ ЧАСТЬ - БАННЕР ТАКОГО ЖЕ РАЗМЕРА */
+        .right-section {
+            flex: 1;
+            max-width: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-container {
+            width: 100%;
+            animation: bannerFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes bannerFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(0.5deg); }
+        }
+
+        .banner-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(236,0,140,0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-radius: 0; /* Убрал скругление */
+        }
+
+        .banner-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,174,239,0.4), 0 0 0 6px rgba(255,255,255,0.6), 0 0 0 10px rgba(0,174,239,0.3);
+        }
+
+        /* РЕЗУЛЬТАТ И ТАЙМЕР ПОД КОЛЕСОМ */
         .result-message {
             background: linear-gradient(145deg, #00AEEF, #0099cc);
             color: white;
             padding: 20px;
-            border-radius: 60px;
             font-size: 1.3rem;
             margin: 20px 0;
             font-weight: bold;
@@ -282,6 +277,7 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 0 2px rgba(255,255,255,0.5) inset;
             animation: resultGlow 2s ease-in-out infinite;
             transition: all 0.3s ease;
+            border-radius: 0; /* Убрал скругление */
         }
 
         @keyframes resultGlow {
@@ -308,12 +304,12 @@
             background: rgba(249, 249, 249, 0.9);
             backdrop-filter: blur(5px);
             padding: 15px;
-            border-radius: 20px;
             color: #2D2D2D;
             border-left: 5px solid #EC008C;
             border-right: 5px solid #00AEEF;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             animation: slideIn 0.8s ease-out;
+            border-radius: 0; /* Убрал скругление */
         }
 
         @keyframes slideIn {
@@ -342,45 +338,23 @@
         }
 
         /* Адаптивность для мобильных */
-        @media (max-width: 1100px) {
+        @media (max-width: 900px) {
             .main-wrapper {
                 flex-direction: column;
                 padding: 20px;
             }
             
-            .banner-left {
-                flex: 0 0 auto;
-                width: 100%;
-                max-width: 400px;
-            }
-        }
-
-        @media (max-width: 500px) {
-            .banner-left {
-                max-width: 300px;
-            }
-            
-            .spin-center {
-                width: 70px;
-                height: 70px;
-            }
-            
-            #centerLogo {
-                width: 50px;
-                height: 50px;
+            .left-section, .right-section {
+                max-width: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="main-wrapper">
-        <!-- БАННЕР ТЕПЕРЬ ТАКОГО ЖЕ РАЗМЕРА КАК КОЛЕСО -->
-        <div class="banner-left">
-            <img src="banner.png" alt="Баннер акции" class="banner-image" onclick="window.open('https://a4-print.ru', '_blank')">
-        </div>
-
-        <!-- ОСНОВНОЙ КОНТЕНТ С КОЛЕСОМ -->
-        <div class="container">
+        <!-- ЛЕВАЯ ЧАСТЬ - КОЛЕСО -->
+        <div class="left-section">
+            <!-- ЛОГОТИП ПО ЦЕНТРУ -->
             <div class="top-logo">
                 <img src="images/logo.png" alt="А4-ПРИНТ" class="top-logo-image">
             </div>
@@ -409,6 +383,13 @@
                 <p>⏱️ <strong>Таймер:</strong> 30 секунд между прокрутками</p>
             </div>
         </div>
+
+        <!-- ПРАВАЯ ЧАСТЬ - БАННЕР ТАКОГО ЖЕ РАЗМЕРА -->
+        <div class="right-section">
+            <div class="banner-container">
+                <img src="banner.png" alt="Баннер акции" class="banner-image" onclick="window.open('https://a4-print.ru', '_blank')">
+            </div>
+        </div>
     </div>
 
     <script>
@@ -417,17 +398,58 @@
         const resultDiv = document.getElementById('result');
         const timerDiv = document.getElementById('timer');
 
+        // НАСТРОЙКИ СЕКТОРОВ
         const segments = [
-            { label: '5%', description: '🎁 Скидка 5% на текущий заказ!', color: '#FFB6C1' },
-            { label: '10%', description: '🎁 Скидка 10% на текущий заказ!', color: '#FFD700' },
-            { label: '15%', description: '🎁 Скидка 15% на текущий заказ!', color: '#98FB98' },
-            { label: '20%', description: '🎁 Скидка 20% на текущий заказ!', color: '#87CEEB' },
-            { label: '25%', description: '🎁 Скидка 25% на текущий заказ!', color: '#DDA0DD' },
-            { label: '30%', description: '🎁 Скидка 30% на текущий заказ!', color: '#F0E68C' },
-            { label: '40%', description: '🎁 Скидка 40% на текущий заказ!', color: '#FFA07A' },
-            { label: '50%', description: '🏆 ДЖЕКПОТ: Скидка 50% на заказ! 🏆', color: '#FF4500' },
-            { label: 'РАМКА', description: '🖼️ РАМОЧКА ДЛЯ ФОТО в подарок + скидка 10% на фотоуслуги!', color: '#00AEEF' },
-            { label: 'ФОТО+РАМКА', description: '🖼️ РАМОЧКА с вашим снимком! Мы печатаем фото и дарим в рамке', color: '#EC008C' }
+            { 
+                label: '5%', 
+                description: '🎁 Скидка 5% на текущий заказ!', 
+                color: '#FFB6C1'
+            },
+            { 
+                label: '10%', 
+                description: '🎁 Скидка 10% на текущий заказ!', 
+                color: '#FFD700'
+            },
+            { 
+                label: '15%', 
+                description: '🎁 Скидка 15% на текущий заказ!', 
+                color: '#98FB98'
+            },
+            { 
+                label: '20%', 
+                description: '🎁 Скидка 20% на текущий заказ!', 
+                color: '#87CEEB'
+            },
+            { 
+                label: '25%', 
+                description: '🎁 Скидка 25% на текущий заказ!', 
+                color: '#DDA0DD'
+            },
+            { 
+                label: '30%', 
+                description: '🎁 Скидка 30% на текущий заказ!', 
+                color: '#F0E68C'
+            },
+            { 
+                label: '40%', 
+                description: '🎁 Скидка 40% на текущий заказ!', 
+                color: '#FFA07A'
+            },
+            { 
+                label: '50%', 
+                description: '🏆 ДЖЕКПОТ: Скидка 50% на заказ! 🏆', 
+                color: '#FF4500'
+            },
+            { 
+                label: 'РАМКА', 
+                description: '🖼️ РАМОЧКА ДЛЯ ФОТО в подарок + скидка 10% на фотоуслуги!', 
+                color: '#00AEEF'
+            },
+            { 
+                label: 'ФОТО+РАМКА', 
+                description: '🖼️ РАМОЧКА с вашим снимком! Мы печатаем фото и дарим в рамке', 
+                color: '#EC008C'
+            }
         ];
 
         let currentAngle = 0;
@@ -438,6 +460,7 @@
         let timerInterval = null;
         let timeLeft = 0;
 
+        // Функция для создания объемного эффекта на секторах
         function draw3DSegment(startAngle, endAngle, color, isEven) {
             const gradient = ctx.createRadialGradient(
                 canvas.width / 2 - 20, canvas.height / 2 - 20, 10,
@@ -462,6 +485,7 @@
             ctx.closePath();
             ctx.fill();
             
+            // Добавляем блик
             ctx.save();
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2, canvas.height / 2);
@@ -481,6 +505,7 @@
             ctx.restore();
         }
 
+        // Вспомогательная функция для затемнения цвета
         function shadeColor(color, percent) {
             let R = parseInt(color.substring(1,3),16);
             let G = parseInt(color.substring(3,5),16);
@@ -493,15 +518,18 @@
             return `rgb(${R}, ${G}, ${B})`;
         }
 
+        // Рисуем объемное колесо
         function drawWheel(angle) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             const arc = (Math.PI * 2) / segments.length;
             
+            // Рисуем тень под колесом
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowBlur = 20;
             ctx.shadowOffsetY = 5;
             
+            // Рисуем фон колеса с градиентом
             const wheelGradient = ctx.createRadialGradient(
                 canvas.width / 2, canvas.height / 2, 10,
                 canvas.width / 2, canvas.height / 2, canvas.width / 2
@@ -521,8 +549,10 @@
                 const startAngle = i * arc + angle;
                 const endAngle = (i + 1) * arc + angle;
                 
+                // Рисуем 3D сектор
                 draw3DSegment(startAngle, endAngle, segments[i].color, i % 2 === 0);
                 
+                // Рисуем объемные разделители
                 ctx.strokeStyle = 'rgba(255,255,255,0.8)';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
@@ -533,6 +563,7 @@
                 );
                 ctx.stroke();
                 
+                // Добавляем текст с тенью
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(startAngle + arc / 2);
@@ -559,10 +590,12 @@
                 ctx.restore();
             }
             
+            // Рисуем объемный указатель
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.shadowBlur = 10;
             ctx.shadowOffsetY = 3;
             
+            // Основа стрелки
             ctx.fillStyle = '#EC008C';
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2 - 15, 5);
@@ -571,6 +604,7 @@
             ctx.closePath();
             ctx.fill();
             
+            // Блик на стрелке
             ctx.fillStyle = 'rgba(255,255,255,0.3)';
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2 - 12, 8);
@@ -583,6 +617,7 @@
             ctx.shadowOffsetY = 0;
         }
 
+        // Функция для запуска таймера
         function startTimer(seconds) {
             isBlocked = true;
             timeLeft = seconds;
@@ -606,6 +641,7 @@
             }, 1000);
         }
 
+        // Функция вращения
         function spinWheel() {
             if (isSpinning || isBlocked) {
                 if (isBlocked) {
@@ -677,6 +713,7 @@
             drawWheel(currentAngle);
         });
 
+        // Обработчики ошибок загрузки изображений
         const topLogo = document.querySelector('.top-logo-image');
         topLogo.onerror = function() {
             console.log('Логотип не загружен, проверьте путь images/logo.png');
@@ -686,13 +723,13 @@
         const banner = document.querySelector('.banner-image');
         banner.onerror = function() {
             console.log('Баннер не загружен, проверьте путь banner.png');
-            this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><rect width="500" height="500" fill="%23EC008C"/><text x="250" y="250" font-size="40" text-anchor="middle" fill="white" dominant-baseline="middle">АКЦИЯ</text></svg>';
+            this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><rect width="500" height="500" fill="%23EC008C"/><text x="250" y="250" font-size="40" text-anchor="middle" fill="white">АКЦИЯ</text></svg>';
         };
 
         const centerLogo = document.getElementById('centerLogo');
         centerLogo.onerror = function() {
             console.log('Логотип не загружен, проверьте путь images/logo_soc.png');
-            this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%2300AEEF"/><text x="50" y="70" font-size="50" text-anchor="middle" fill="white">A4</text></svg>';
+            this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2300AEEF"/><text x="50" y="65" font-size="50" text-anchor="middle" fill="white">A4</text></svg>';
         };
     </script>
 </body>
