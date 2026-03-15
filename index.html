@@ -90,7 +90,6 @@
         /* ЛОГОТИП ПО ЦЕНТРУ НАД КОЛЕСОМ */
         .top-logo {
             margin-bottom: 20px;
-            /* УБРАЛ анимацию */
         }
 
         .top-logo-image {
@@ -148,7 +147,6 @@
             max-width: 500px;
             margin: 0 auto 20px;
             filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));
-            /* УБРАЛ анимацию движения */
         }
 
         #wheelCanvas {
@@ -174,7 +172,7 @@
             100% { filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); }
         }
 
-        /* Центр колеса с логотипом */
+        /* Центр колеса с логотипом - УБРАЛ ФОН */
         .spin-center {
             position: absolute;
             top: 50%;
@@ -182,24 +180,23 @@
             transform: translate(-50%, -50%);
             width: 100px;
             height: 100px;
-            background: linear-gradient(145deg, #ffffff, #e0e0e0);
-            border: 4px solid #2D2D2D;
+            /* УБРАЛ background */
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 20;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            /* УБРАЛ box-shadow */
             pointer-events: none;
             border-radius: 0;
         }
 
         #centerLogo {
-            width: 70px;
-            height: 70px;
+            width: 100px;
+            height: 100px;
             object-fit: contain;
             pointer-events: none;
             border-radius: 0;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
         }
 
         /* ПРАВАЯ ЧАСТЬ - БАННЕР */
@@ -207,15 +204,15 @@
             flex: 1;
             max-width: 500px;
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* ПОДНЯЛ баннер выше */
             justify-content: center;
+            margin-top: -50px; /* Дополнительное поднятие */
         }
 
         .banner-container {
             width: 100%;
             display: flex;
             justify-content: center;
-            /* УБРАЛ анимацию */
         }
 
         .banner-image {
@@ -233,7 +230,7 @@
             filter: drop-shadow(0 25px 35px rgba(0,174,239,0.4));
         }
 
-        /* РЕЗУЛЬТАТ И ТАЙМЕР ПОД КОЛЕСОМ - СКРУГЛЕННЫЕ УГЛЫ */
+        /* РЕЗУЛЬТАТ И ТАЙМЕР ПОД КОЛЕСОМ */
         .result-message {
             background: linear-gradient(145deg, #00AEEF, #0099cc);
             color: white;
@@ -250,7 +247,8 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             animation: resultGlow 2s ease-in-out infinite;
             transition: all 0.3s ease;
-            border-radius: 50px; /* СКРУГЛЕННЫЕ УГЛЫ */
+            border-radius: 50px;
+            width: 100%;
         }
 
         @keyframes resultGlow {
@@ -283,6 +281,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             animation: slideIn 0.8s ease-out;
             border-radius: 0;
+            width: 100%;
         }
 
         @keyframes slideIn {
@@ -310,15 +309,94 @@
             color: #EC008C;
         }
 
-        /* Адаптивность для мобильных */
+        /* УЛУЧШЕННАЯ АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ */
         @media (max-width: 900px) {
             .main-wrapper {
                 flex-direction: column;
-                padding: 20px;
+                padding: 15px;
+                gap: 15px;
             }
             
             .left-section, .right-section {
                 max-width: 100%;
+                width: 100%;
+            }
+            
+            .right-section {
+                margin-top: 0; /* Убираем отрицательный отступ на мобильных */
+                align-items: center;
+            }
+            
+            .banner-image {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .result-message {
+                font-size: 1.1rem;
+                padding: 15px;
+                min-height: 60px;
+            }
+            
+            .timer {
+                font-size: 1.5rem;
+            }
+            
+            .rules {
+                font-size: 0.9rem;
+                padding: 12px;
+            }
+            
+            .spin-center {
+                width: 70px;
+                height: 70px;
+            }
+            
+            #centerLogo {
+                width: 70px;
+                height: 70px;
+            }
+        }
+
+        /* Дополнительная адаптация для очень маленьких экранов */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .main-wrapper {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .result-message {
+                font-size: 1rem;
+                padding: 12px;
+            }
+            
+            .rules p {
+                font-size: 0.85rem;
+            }
+            
+            .spin-center {
+                width: 60px;
+                height: 60px;
+            }
+            
+            #centerLogo {
+                width: 60px;
+                height: 60px;
             }
         }
     </style>
@@ -520,7 +598,7 @@
                 );
                 ctx.stroke();
                 
-                // Добавляем текст - ТЕПЕРЬ ЦЕНТРИРОВАН ПО СЕКТОРУ
+                // Добавляем текст - центрированный по сектору
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 
@@ -528,13 +606,13 @@
                 const textAngle = startAngle + arc / 2;
                 
                 // Перемещаемся в точку на полпути от центра к краю
-                const textRadius = canvas.width / 3; // Радиус для текста (ближе к центру)
+                const textRadius = canvas.width / 3;
                 const textX = Math.cos(textAngle) * textRadius;
                 const textY = Math.sin(textAngle) * textRadius;
                 
                 ctx.translate(textX, textY);
                 
-                // Поворачиваем текст, чтобы он был читаемым
+                // Поворачиваем текст для читаемости
                 ctx.rotate(textAngle + (textAngle > Math.PI/2 && textAngle < 3*Math.PI/2 ? Math.PI : 0));
                 
                 ctx.textAlign = 'center';
