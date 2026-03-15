@@ -63,7 +63,7 @@
             75% { transform: translate(2%, 2%) rotate(-1deg); }
         }
 
-        /* ОСНОВНОЙ КОНТЕЙНЕР С БЕЛЫМ ФОНОМ */
+        /* ОСНОВНОЙ КОНТЕЙНЕР - УБРАЛ БЕЛЫЙ ФОН */
         .main-wrapper {
             display: flex;
             align-items: center;
@@ -73,10 +73,10 @@
             width: 100%;
             position: relative;
             z-index: 10;
-            background: white;
+            /* УБРАЛ background: white */
             padding: 40px;
             border-radius: 0;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            /* УБРАЛ box-shadow */
         }
 
         /* ЛЕВАЯ ЧАСТЬ - КОЛЕСО */
@@ -168,11 +168,10 @@
             height: auto;
             display: block;
             border-radius: 0;
-            /* УБРАЛ ОКОНТОВКУ */
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            /* УБРАЛ box-shadow полностью */
             transition: all 0.3s ease;
             cursor: pointer;
-            background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0);
+            /* УБРАЛ background */
             animation: rotateGlow 3s linear infinite;
         }
 
@@ -181,13 +180,13 @@
             filter: grayscale(50%);
             cursor: not-allowed;
             animation: none;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            /* УБРАЛ box-shadow */
         }
 
         @keyframes rotateGlow {
-            0% { box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-            50% { box-shadow: 0 25px 50px rgba(236,0,140,0.4); }
-            100% { box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+            0% { filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); }
+            50% { filter: drop-shadow(0 25px 35px rgba(236,0,140,0.4)); }
+            100% { filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); }
         }
 
         /* Центр колеса с логотипом */
@@ -255,16 +254,16 @@
             width: 100%;
             height: auto;
             display: block;
-            /* УБРАЛ ОКОНТОВКУ */
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            /* УБРАЛ box-shadow полностью */
             transition: all 0.3s ease;
             cursor: pointer;
             border-radius: 0;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));
         }
 
         .banner-image:hover {
             transform: scale(1.02);
-            box-shadow: 0 25px 50px rgba(0,174,239,0.4);
+            filter: drop-shadow(0 25px 35px rgba(0,174,239,0.4));
         }
 
         /* РЕЗУЛЬТАТ И ТАЙМЕР ПОД КОЛЕСОМ */
@@ -536,21 +535,8 @@
             ctx.shadowBlur = 20;
             ctx.shadowOffsetY = 5;
             
-            // Рисуем фон колеса с градиентом
-            const wheelGradient = ctx.createRadialGradient(
-                canvas.width / 2, canvas.height / 2, 10,
-                canvas.width / 2, canvas.height / 2, canvas.width / 2
-            );
-            wheelGradient.addColorStop(0, '#f0f0f0');
-            wheelGradient.addColorStop(1, '#d0d0d0');
-            
-            ctx.beginPath();
-            ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 8, 0, Math.PI * 2);
-            ctx.fillStyle = wheelGradient;
-            ctx.fill();
-            
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetY = 0;
+            // УБРАЛ фон колеса
+            // Просто рисуем сектора на прозрачном фоне
             
             for (let i = 0; i < segments.length; i++) {
                 const startAngle = i * arc + angle;
