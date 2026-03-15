@@ -63,7 +63,7 @@
             75% { transform: translate(2%, 2%) rotate(-1deg); }
         }
 
-        /* ОСНОВНОЙ КОНТЕЙНЕР - УБРАЛ БЕЛЫЙ ФОН */
+        /* ОСНОВНОЙ КОНТЕЙНЕР */
         .main-wrapper {
             display: flex;
             align-items: center;
@@ -73,10 +73,8 @@
             width: 100%;
             position: relative;
             z-index: 10;
-            /* УБРАЛ background: white */
             padding: 40px;
             border-radius: 0;
-            /* УБРАЛ box-shadow */
         }
 
         /* ЛЕВАЯ ЧАСТЬ - КОЛЕСО */
@@ -92,12 +90,7 @@
         /* ЛОГОТИП ПО ЦЕНТРУ НАД КОЛЕСОМ */
         .top-logo {
             margin-bottom: 20px;
-            animation: logoFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes logoFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+            /* УБРАЛ анимацию */
         }
 
         .top-logo-image {
@@ -155,12 +148,7 @@
             max-width: 500px;
             margin: 0 auto 20px;
             filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));
-            animation: wheelFloat 4s ease-in-out infinite;
-        }
-
-        @keyframes wheelFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            /* УБРАЛ анимацию движения */
         }
 
         #wheelCanvas {
@@ -168,10 +156,8 @@
             height: auto;
             display: block;
             border-radius: 0;
-            /* УБРАЛ box-shadow полностью */
             transition: all 0.3s ease;
             cursor: pointer;
-            /* УБРАЛ background */
             animation: rotateGlow 3s linear infinite;
         }
 
@@ -180,7 +166,6 @@
             filter: grayscale(50%);
             cursor: not-allowed;
             animation: none;
-            /* УБРАЛ box-shadow */
         }
 
         @keyframes rotateGlow {
@@ -205,19 +190,7 @@
             z-index: 20;
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
             pointer-events: none;
-            animation: pulse3D 2s ease-in-out infinite;
             border-radius: 0;
-        }
-
-        @keyframes pulse3D {
-            0%, 100% { 
-                box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-                transform: translate(-50%, -50%) scale(1);
-            }
-            50% { 
-                box-shadow: 0 15px 30px rgba(236,0,140,0.4);
-                transform: translate(-50%, -50%) scale(1.05);
-            }
         }
 
         #centerLogo {
@@ -240,21 +213,15 @@
 
         .banner-container {
             width: 100%;
-            animation: bannerFloat 4s ease-in-out infinite;
             display: flex;
             justify-content: center;
-        }
-
-        @keyframes bannerFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(0.5deg); }
+            /* УБРАЛ анимацию */
         }
 
         .banner-image {
             width: 100%;
             height: auto;
             display: block;
-            /* УБРАЛ box-shadow полностью */
             transition: all 0.3s ease;
             cursor: pointer;
             border-radius: 0;
@@ -266,7 +233,7 @@
             filter: drop-shadow(0 25px 35px rgba(0,174,239,0.4));
         }
 
-        /* РЕЗУЛЬТАТ И ТАЙМЕР ПОД КОЛЕСОМ */
+        /* РЕЗУЛЬТАТ И ТАЙМЕР ПОД КОЛЕСОМ - СКРУГЛЕННЫЕ УГЛЫ */
         .result-message {
             background: linear-gradient(145deg, #00AEEF, #0099cc);
             color: white;
@@ -283,7 +250,7 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             animation: resultGlow 2s ease-in-out infinite;
             transition: all 0.3s ease;
-            border-radius: 0;
+            border-radius: 50px; /* СКРУГЛЕННЫЕ УГЛЫ */
         }
 
         @keyframes resultGlow {
@@ -535,9 +502,6 @@
             ctx.shadowBlur = 20;
             ctx.shadowOffsetY = 5;
             
-            // УБРАЛ фон колеса
-            // Просто рисуем сектора на прозрачном фоне
-            
             for (let i = 0; i < segments.length; i++) {
                 const startAngle = i * arc + angle;
                 const endAngle = (i + 1) * arc + angle;
@@ -556,11 +520,25 @@
                 );
                 ctx.stroke();
                 
-                // Добавляем текст с тенью
+                // Добавляем текст - ТЕПЕРЬ ЦЕНТРИРОВАН ПО СЕКТОРУ
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate(startAngle + arc / 2);
+                
+                // Вычисляем угол для текста (центр сектора)
+                const textAngle = startAngle + arc / 2;
+                
+                // Перемещаемся в точку на полпути от центра к краю
+                const textRadius = canvas.width / 3; // Радиус для текста (ближе к центру)
+                const textX = Math.cos(textAngle) * textRadius;
+                const textY = Math.sin(textAngle) * textRadius;
+                
+                ctx.translate(textX, textY);
+                
+                // Поворачиваем текст, чтобы он был читаемым
+                ctx.rotate(textAngle + (textAngle > Math.PI/2 && textAngle < 3*Math.PI/2 ? Math.PI : 0));
+                
                 ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
                 
                 ctx.shadowColor = 'rgba(0,0,0,0.3)';
                 ctx.shadowBlur = 5;
@@ -574,12 +552,12 @@
                 }
                 
                 if (segments[i].label === 'ФОТО+РАМКА') {
-                    ctx.font = 'bold ' + (canvas.width / 24) + 'px "Segoe UI"';
+                    ctx.font = 'bold ' + (canvas.width / 22) + 'px "Segoe UI"';
                 } else {
-                    ctx.font = 'bold ' + (canvas.width / 20) + 'px "Segoe UI"';
+                    ctx.font = 'bold ' + (canvas.width / 18) + 'px "Segoe UI"';
                 }
                 
-                ctx.fillText(segments[i].label, canvas.width / 4, 15);
+                ctx.fillText(segments[i].label, 0, 0);
                 ctx.restore();
             }
             
