@@ -172,7 +172,7 @@
             100% { filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); }
         }
 
-        /* Центр колеса с логотипом */
+        /* Центр колеса с логотипом - УБРАЛ ТЕНЬ */
         .spin-center {
             position: absolute;
             top: 50%;
@@ -194,7 +194,7 @@
             object-fit: contain;
             pointer-events: none;
             border-radius: 0;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+            /* УБРАЛ filter: drop-shadow */
         }
 
         /* ПРАВАЯ ЧАСТЬ - БАННЕР */
@@ -494,7 +494,7 @@
                 color: '#00AEEF'
             },
             { 
-                label: 'ФОТО+РМК', /* СОКРАТИЛ ТЕКСТ */
+                label: 'ФОТО+РМК',
                 description: '🖼️ РАМОЧКА с вашим снимком! Мы печатаем фото и дарим в рамке', 
                 color: '#EC008C'
             }
@@ -595,21 +595,16 @@
                 );
                 ctx.stroke();
                 
-                // Добавляем текст - центрированный по сектору
+                // Добавляем текст
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 
-                // Вычисляем угол для текста (центр сектора)
                 const textAngle = startAngle + arc / 2;
-                
-                // Перемещаемся в точку на полпути от центра к краю
                 const textRadius = canvas.width / 3;
                 const textX = Math.cos(textAngle) * textRadius;
                 const textY = Math.sin(textAngle) * textRadius;
                 
                 ctx.translate(textX, textY);
-                
-                // Поворачиваем текст для читаемости
                 ctx.rotate(textAngle + (textAngle > Math.PI/2 && textAngle < 3*Math.PI/2 ? Math.PI : 0));
                 
                 ctx.textAlign = 'center';
@@ -626,15 +621,11 @@
                     ctx.fillStyle = '#000000';
                 }
                 
-                // РАЗНЫЕ РАЗМЕРЫ ШРИФТА ДЛЯ РАЗНЫХ ТЕКСТОВ
                 if (segments[i].label === 'ФОТО+РМК') {
-                    // Самый маленький шрифт для длинного текста
                     ctx.font = 'bold ' + (canvas.width / 28) + 'px "Segoe UI"';
                 } else if (segments[i].label === 'РАМКА') {
-                    // Средний шрифт для "РАМКА"
                     ctx.font = 'bold ' + (canvas.width / 22) + 'px "Segoe UI"';
                 } else {
-                    // Обычный шрифт для процентов
                     ctx.font = 'bold ' + (canvas.width / 18) + 'px "Segoe UI"';
                 }
                 
@@ -647,7 +638,6 @@
             ctx.shadowBlur = 10;
             ctx.shadowOffsetY = 3;
             
-            // Основа стрелки
             ctx.fillStyle = '#EC008C';
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2 - 15, 5);
@@ -656,7 +646,6 @@
             ctx.closePath();
             ctx.fill();
             
-            // Блик на стрелке
             ctx.fillStyle = 'rgba(255,255,255,0.3)';
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2 - 12, 8);
