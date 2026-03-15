@@ -172,7 +172,7 @@
             100% { filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); }
         }
 
-        /* Центр колеса с логотипом - УБРАЛ ФОН */
+        /* Центр колеса с логотипом */
         .spin-center {
             position: absolute;
             top: 50%;
@@ -180,12 +180,10 @@
             transform: translate(-50%, -50%);
             width: 100px;
             height: 100px;
-            /* УБРАЛ background */
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 20;
-            /* УБРАЛ box-shadow */
             pointer-events: none;
             border-radius: 0;
         }
@@ -204,9 +202,9 @@
             flex: 1;
             max-width: 500px;
             display: flex;
-            align-items: flex-start; /* ПОДНЯЛ баннер выше */
+            align-items: flex-start;
             justify-content: center;
-            margin-top: -50px; /* Дополнительное поднятие */
+            margin-top: -50px;
         }
 
         .banner-container {
@@ -309,7 +307,7 @@
             color: #EC008C;
         }
 
-        /* УЛУЧШЕННАЯ АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ */
+        /* Адаптация для мобильных */
         @media (max-width: 900px) {
             .main-wrapper {
                 flex-direction: column;
@@ -323,7 +321,7 @@
             }
             
             .right-section {
-                margin-top: 0; /* Убираем отрицательный отступ на мобильных */
+                margin-top: 0;
                 align-items: center;
             }
             
@@ -366,7 +364,6 @@
             }
         }
 
-        /* Дополнительная адаптация для очень маленьких экранов */
         @media (max-width: 480px) {
             body {
                 padding: 10px;
@@ -497,7 +494,7 @@
                 color: '#00AEEF'
             },
             { 
-                label: 'ФОТО+РАМКА', 
+                label: 'ФОТО+РМК', /* СОКРАТИЛ ТЕКСТ */
                 description: '🖼️ РАМОЧКА с вашим снимком! Мы печатаем фото и дарим в рамке', 
                 color: '#EC008C'
             }
@@ -629,9 +626,15 @@
                     ctx.fillStyle = '#000000';
                 }
                 
-                if (segments[i].label === 'ФОТО+РАМКА') {
+                // РАЗНЫЕ РАЗМЕРЫ ШРИФТА ДЛЯ РАЗНЫХ ТЕКСТОВ
+                if (segments[i].label === 'ФОТО+РМК') {
+                    // Самый маленький шрифт для длинного текста
+                    ctx.font = 'bold ' + (canvas.width / 28) + 'px "Segoe UI"';
+                } else if (segments[i].label === 'РАМКА') {
+                    // Средний шрифт для "РАМКА"
                     ctx.font = 'bold ' + (canvas.width / 22) + 'px "Segoe UI"';
                 } else {
+                    // Обычный шрифт для процентов
                     ctx.font = 'bold ' + (canvas.width / 18) + 'px "Segoe UI"';
                 }
                 
