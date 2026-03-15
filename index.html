@@ -22,38 +22,27 @@
             position: relative;
             overflow-x: hidden;
             
-            /* НОВЫЙ ЭФФЕКТ ПЕРЕЛИВАНИЯ CMYK С ПРОЗРАЧНОСТЬЮ 30% */
+            /* Эффект переливания CMYK с прозрачностью 30% */
             background: linear-gradient(
                 135deg, 
-                rgba(0, 174, 239, 0.3) 0%,      /* Cyan 30% */
-                rgba(236, 0, 140, 0.3) 33%,     /* Magenta 30% */
-                rgba(255, 242, 0, 0.3) 66%,     /* Yellow 30% */
-                rgba(45, 45, 45, 0.3) 100%      /* Black 30% */
+                rgba(0, 174, 239, 0.3) 0%,
+                rgba(236, 0, 140, 0.3) 33%,
+                rgba(255, 242, 0, 0.3) 66%,
+                rgba(45, 45, 45, 0.3) 100%
             );
             background-size: 400% 400%;
             animation: cmykFlow 15s ease infinite;
         }
 
-        /* Анимация переливания CMYK */
         @keyframes cmykFlow {
-            0% {
-                background-position: 0% 50%;
-            }
-            25% {
-                background-position: 50% 100%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            75% {
-                background-position: 50% 0%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
+            0% { background-position: 0% 50%; }
+            25% { background-position: 50% 100%; }
+            50% { background-position: 100% 50%; }
+            75% { background-position: 50% 0%; }
+            100% { background-position: 0% 50%; }
         }
 
-        /* Анимированные частицы фона (поверх CMYK) */
+        /* Анимированные частицы фона */
         body::before {
             content: '';
             position: absolute;
@@ -74,76 +63,67 @@
             75% { transform: translate(2%, 2%) rotate(-1deg); }
         }
 
-        /* НОВЫЙ КОНТЕЙНЕР ДЛЯ БАННЕРА С БЕЛЫМ ФОНОМ */
-        .banner-wrapper {
-            background: white;
-            border-radius: 30px;
-            padding: 30px 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        /* ОСНОВНОЙ КОНТЕЙНЕР С БЕЛЫМ ФОНОМ */
+        .main-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 20px;
-            animation: bannerWrapperFloat 4s ease-in-out infinite;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
             position: relative;
             z-index: 10;
+            background: white;
+            padding: 40px;
+            border-radius: 50px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            animation: wrapperFloat 4s ease-in-out infinite;
             border: 1px solid rgba(255,255,255,0.5);
         }
 
-        @keyframes bannerWrapperFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-5px) rotate(0.5deg); }
+        @keyframes wrapperFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
 
-        /* СТИЛИ ДЛЯ БАННЕРА */
+        /* СТИЛИ ДЛЯ БАННЕРА (ТЕПЕРЬ ОДИНАКОВОГО РАЗМЕРА С КОЛЕСОМ) */
         .banner-left {
-            flex: 0 0 200px;
+            flex: 0 0 500px; /* Такой же размер как у колеса */
+            max-width: 500px;
+            animation: bannerFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes bannerFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
         }
 
         .banner-image {
             width: 100%;
             height: auto;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 3px rgba(0,174,239,0.3);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 5px rgba(255,255,255,0.5), 0 0 0 8px rgba(0,174,239,0.3);
             transition: all 0.3s ease;
             cursor: pointer;
             display: block;
+            aspect-ratio: 1 / 1; /* Квадратное соотношение как у колеса */
+            object-fit: cover;
         }
 
         .banner-image:hover {
-            transform: scale(1.05) rotate(1deg);
-            box-shadow: 0 25px 50px rgba(236,0,140,0.4), 0 0 0 4px rgba(236,0,140,0.3);
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 0 25px 50px rgba(236,0,140,0.4), 0 0 0 6px rgba(255,255,255,0.6), 0 0 0 10px rgba(236,0,140,0.3);
         }
 
-        /* ОСНОВНОЙ КОНТЕЙНЕР */
-        .main-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            max-width: 1200px;
-            width: 100%;
-            position: relative;
-            z-index: 10;
-        }
-
+        /* ОСНОВНОЙ КОНТЕЙНЕР С КОЛЕСОМ */
         .container {
             text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px;
+            background: transparent; /* Убираем фон, так как основной фон белый */
+            padding: 0;
             border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.5) inset;
-            max-width: 600px;
+            max-width: 500px;
             width: 100%;
             position: relative;
-            animation: glow 3s ease-in-out infinite;
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.5) inset; }
-            50% { box-shadow: 0 25px 70px rgba(255,215,0,0.4), 0 0 0 3px rgba(255,255,255,0.8) inset; }
         }
 
         .top-logo {
@@ -172,7 +152,7 @@
         h1 {
             color: #00AEEF;
             font-size: clamp(1.5rem, 5vw, 2rem);
-            margin-bottom: 5px;
+            margin: 10px 0 5px;
             font-weight: 800;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -285,17 +265,6 @@
             filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
         }
 
-        @media (max-width: 400px) {
-            .spin-center {
-                width: 70px;
-                height: 70px;
-            }
-            #centerLogo {
-                width: 50px;
-                height: 50px;
-            }
-        }
-
         .result-message {
             background: linear-gradient(145deg, #00AEEF, #0099cc);
             color: white;
@@ -373,40 +342,50 @@
         }
 
         /* Адаптивность для мобильных */
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main-wrapper {
                 flex-direction: column;
-            }
-            
-            .banner-wrapper {
-                margin-right: 0;
-                margin-bottom: 20px;
-                width: 80%;
-                max-width: 300px;
+                padding: 20px;
             }
             
             .banner-left {
+                flex: 0 0 auto;
                 width: 100%;
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .banner-left {
+                max-width: 300px;
+            }
+            
+            .spin-center {
+                width: 70px;
+                height: 70px;
+            }
+            
+            #centerLogo {
+                width: 50px;
+                height: 50px;
             }
         }
     </style>
 </head>
 <body>
     <div class="main-wrapper">
-        <!-- НОВЫЙ КОНТЕЙНЕР С БЕЛЫМ ФОНОМ ДЛЯ БАННЕРА -->
-        <div class="banner-wrapper">
-            <div class="banner-left">
-                <img src="banner.png" alt="Баннер акции" class="banner-image" onclick="window.open('https://a4-print.ru', '_blank')">
-            </div>
+        <!-- БАННЕР ТЕПЕРЬ ТАКОГО ЖЕ РАЗМЕРА КАК КОЛЕСО -->
+        <div class="banner-left">
+            <img src="banner.png" alt="Баннер акции" class="banner-image" onclick="window.open('https://a4-print.ru', '_blank')">
         </div>
 
-        <!-- ОСНОВНОЙ КОНТЕНТ -->
+        <!-- ОСНОВНОЙ КОНТЕНТ С КОЛЕСОМ -->
         <div class="container">
             <div class="top-logo">
                 <img src="images/logo.png" alt="А4-ПРИНТ" class="top-logo-image">
             </div>
 
-            <h1>ФОРТУНА СКИДОК И ПОДАРКОВ</h1>
+            <h1>А4-ПРИНТ ДАРИТ СКИДКИ</h1>
             <p class="subtitle">Крути барабан и забирай приз!</p>
 
             <div class="wheel-container">
@@ -427,7 +406,8 @@
                 <p>🎁 <strong>Скидки от 5% до 50%:</strong> Крути и выигрывай!</p>
                 <p>🖼️ <strong>Рамочки в подарок:</strong> Фоторамка или рамка с вашим фото</p>
                 <p>🏆 <strong>Джекпот:</strong> Скидка 50% на весь заказ!</p>
-                     </div>
+                <p>⏱️ <strong>Таймер:</strong> 30 секунд между прокрутками</p>
+            </div>
         </div>
     </div>
 
@@ -437,58 +417,17 @@
         const resultDiv = document.getElementById('result');
         const timerDiv = document.getElementById('timer');
 
-        // НАСТРОЙКИ СЕКТОРОВ
         const segments = [
-            { 
-                label: '5%', 
-                description: '🎁 Скидка 5% на текущий заказ!', 
-                color: '#FFB6C1'
-            },
-            { 
-                label: '10%', 
-                description: '🎁 Скидка 10% на текущий заказ!', 
-                color: '#FFD700'
-            },
-            { 
-                label: '15%', 
-                description: '🎁 Скидка 15% на текущий заказ!', 
-                color: '#98FB98'
-            },
-            { 
-                label: '20%', 
-                description: '🎁 Скидка 20% на текущий заказ!', 
-                color: '#87CEEB'
-            },
-            { 
-                label: '25%', 
-                description: '🎁 Скидка 25% на текущий заказ!', 
-                color: '#DDA0DD'
-            },
-            { 
-                label: '30%', 
-                description: '🎁 Скидка 30% на текущий заказ!', 
-                color: '#F0E68C'
-            },
-            { 
-                label: '40%', 
-                description: '🎁 Скидка 40% на текущий заказ!', 
-                color: '#FFA07A'
-            },
-            { 
-                label: '50%', 
-                description: '🏆 ДЖЕКПОТ: Скидка 50% на заказ! 🏆', 
-                color: '#FF4500'
-            },
-            { 
-                label: 'РАМКА', 
-                description: '🖼️ РАМОЧКА ДЛЯ ФОТО в подарок + скидка 10% на фотоуслуги!', 
-                color: '#00AEEF'
-            },
-            { 
-                label: 'ФОТО+РАМКА', 
-                description: '🖼️ РАМОЧКА с вашим снимком! Мы печатаем фото и дарим в рамке', 
-                color: '#EC008C'
-            }
+            { label: '5%', description: '🎁 Скидка 5% на текущий заказ!', color: '#FFB6C1' },
+            { label: '10%', description: '🎁 Скидка 10% на текущий заказ!', color: '#FFD700' },
+            { label: '15%', description: '🎁 Скидка 15% на текущий заказ!', color: '#98FB98' },
+            { label: '20%', description: '🎁 Скидка 20% на текущий заказ!', color: '#87CEEB' },
+            { label: '25%', description: '🎁 Скидка 25% на текущий заказ!', color: '#DDA0DD' },
+            { label: '30%', description: '🎁 Скидка 30% на текущий заказ!', color: '#F0E68C' },
+            { label: '40%', description: '🎁 Скидка 40% на текущий заказ!', color: '#FFA07A' },
+            { label: '50%', description: '🏆 ДЖЕКПОТ: Скидка 50% на заказ! 🏆', color: '#FF4500' },
+            { label: 'РАМКА', description: '🖼️ РАМОЧКА ДЛЯ ФОТО в подарок + скидка 10% на фотоуслуги!', color: '#00AEEF' },
+            { label: 'ФОТО+РАМКА', description: '🖼️ РАМОЧКА с вашим снимком! Мы печатаем фото и дарим в рамке', color: '#EC008C' }
         ];
 
         let currentAngle = 0;
@@ -499,7 +438,6 @@
         let timerInterval = null;
         let timeLeft = 0;
 
-        // Функция для создания объемного эффекта на секторах
         function draw3DSegment(startAngle, endAngle, color, isEven) {
             const gradient = ctx.createRadialGradient(
                 canvas.width / 2 - 20, canvas.height / 2 - 20, 10,
@@ -524,7 +462,6 @@
             ctx.closePath();
             ctx.fill();
             
-            // Добавляем блик
             ctx.save();
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2, canvas.height / 2);
@@ -544,7 +481,6 @@
             ctx.restore();
         }
 
-        // Вспомогательная функция для затемнения цвета
         function shadeColor(color, percent) {
             let R = parseInt(color.substring(1,3),16);
             let G = parseInt(color.substring(3,5),16);
@@ -557,18 +493,15 @@
             return `rgb(${R}, ${G}, ${B})`;
         }
 
-        // Рисуем объемное колесо
         function drawWheel(angle) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             const arc = (Math.PI * 2) / segments.length;
             
-            // Рисуем тень под колесом
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowBlur = 20;
             ctx.shadowOffsetY = 5;
             
-            // Рисуем фон колеса с градиентом
             const wheelGradient = ctx.createRadialGradient(
                 canvas.width / 2, canvas.height / 2, 10,
                 canvas.width / 2, canvas.height / 2, canvas.width / 2
@@ -588,10 +521,8 @@
                 const startAngle = i * arc + angle;
                 const endAngle = (i + 1) * arc + angle;
                 
-                // Рисуем 3D сектор
                 draw3DSegment(startAngle, endAngle, segments[i].color, i % 2 === 0);
                 
-                // Рисуем объемные разделители
                 ctx.strokeStyle = 'rgba(255,255,255,0.8)';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
@@ -602,7 +533,6 @@
                 );
                 ctx.stroke();
                 
-                // Добавляем текст с тенью
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(startAngle + arc / 2);
@@ -629,12 +559,10 @@
                 ctx.restore();
             }
             
-            // Рисуем объемный указатель
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.shadowBlur = 10;
             ctx.shadowOffsetY = 3;
             
-            // Основа стрелки
             ctx.fillStyle = '#EC008C';
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2 - 15, 5);
@@ -643,7 +571,6 @@
             ctx.closePath();
             ctx.fill();
             
-            // Блик на стрелке
             ctx.fillStyle = 'rgba(255,255,255,0.3)';
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2 - 12, 8);
@@ -656,7 +583,6 @@
             ctx.shadowOffsetY = 0;
         }
 
-        // Функция для запуска таймера
         function startTimer(seconds) {
             isBlocked = true;
             timeLeft = seconds;
@@ -680,7 +606,6 @@
             }, 1000);
         }
 
-        // Функция вращения
         function spinWheel() {
             if (isSpinning || isBlocked) {
                 if (isBlocked) {
@@ -752,7 +677,6 @@
             drawWheel(currentAngle);
         });
 
-        // Обработчики ошибок загрузки изображений
         const topLogo = document.querySelector('.top-logo-image');
         topLogo.onerror = function() {
             console.log('Логотип не загружен, проверьте путь images/logo.png');
@@ -762,7 +686,7 @@
         const banner = document.querySelector('.banner-image');
         banner.onerror = function() {
             console.log('Баннер не загружен, проверьте путь banner.png');
-            this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400"><rect width="200" height="400" fill="%23EC008C"/><text x="100" y="200" font-size="30" text-anchor="middle" fill="white">АКЦИЯ</text></svg>';
+            this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><rect width="500" height="500" fill="%23EC008C"/><text x="250" y="250" font-size="40" text-anchor="middle" fill="white" dominant-baseline="middle">АКЦИЯ</text></svg>';
         };
 
         const centerLogo = document.getElementById('centerLogo');
