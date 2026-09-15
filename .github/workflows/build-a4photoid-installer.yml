@@ -62,10 +62,17 @@ jobs:
         run: |
           $patchParts = @(
             '.\v07\patch.part00.b64',
-            '.\v07\gp01.b64',
+            '.\v07\p01fix00.b64',
+            '.\v07\p01fix01.b64',
+            '.\v07\p01fix02.b64',
+            '.\v07\p01fix03.b64',
+            '.\v07\p01fix04.b64',
             '.\v07\gp02.b64',
             '.\v07\gp03.b64',
-            '.\v07\gp04.b64',
+            '.\v07\p04fix00.b64',
+            '.\v07\p04fix01.b64',
+            '.\v07\p04fix02.b64',
+            '.\v07\p04fix03.b64',
             '.\v07\gp05.b64'
           )
           $patchB64 = ($patchParts | ForEach-Object { Get-Content $_ -Raw }) -join ''
