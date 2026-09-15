@@ -88,18 +88,17 @@ jobs:
             } finally { $gzip.Dispose() }
           } finally { $input.Dispose() }
 
-          Push-Location '.\buildsrc\A4PhotoID'
-          try {
-            git apply --check '..\..\v07.patch'
-            if ($LASTEXITCODE -ne 0) { throw 'git apply --check failed' }
-            git apply --whitespace=nowarn '..\..\v07.patch'
-            if ($LASTEXITCODE -ne 0) { throw 'git apply failed' }
-          } finally {
-            Pop-Location
-          }
+          git apply --check --directory=buildsrc/A4PhotoID .\v07.patch
+          if ($LASTEXITCODE -ne 0) { throw 'git apply --check failed' }
+          git apply --whitespace=nowarn --directory=buildsrc/A4PhotoID .\v07.patch
+          if ($LASTEXITCODE -ne 0) { throw 'git apply failed' }
 
-          Write-Host "A4 PhotoID 0.7 patch applied successfully"
-          Get-Content '.\buildsrc\A4PhotoID\src\A4PhotoID\A4PhotoID.csproj' | Select-String 'Version|AssemblyVersion|FileVersion'
+          $projectText = Get-Content '.\buildsrc\A4PhotoID\src\A4PhotoID\A4PhotoID.csproj' -Raw
+          if (-not $projectText.Contains('<Version>0.7.0</Version>')) {
+            Write-Host $projectText
+            throw 'A4 PhotoID 0.7 patch did not update the restored project'
+          }
+          Write-Host "A4 PhotoID 0.7 patch applied inside restored project"
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
