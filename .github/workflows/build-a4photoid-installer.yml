@@ -16,16 +16,9 @@ jobs:
       - name: Diagnose source chunks
         shell: powershell
         run: |
-          function Sha1([string]$text) {
-            $bytes = [Text.Encoding]::UTF8.GetBytes($text)
-            $sha = [Security.Cryptography.SHA1]::Create()
-            (($sha.ComputeHash($bytes) | ForEach-Object ToString x2) -join '')
-          }
           $t = Get-Content .\a4photoid-src.part05.b64 -Raw
           Write-Host "part05 len=$($t.Length)"
-          for ($n=4096; $n -le 5120; $n+=64) {
-            if ($t.Length -ge $n) { Write-Host "part05 prefix $n sha1=$(Sha1 $t.Substring(0,$n))" }
-          }
+          Write-Host "part05 slice=$($t.Substring(4320,140))"
       - name: Rebuild source archive
         shell: powershell
         run: |
