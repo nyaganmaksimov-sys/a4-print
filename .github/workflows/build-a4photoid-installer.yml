@@ -31,7 +31,7 @@ jobs:
           [IO.File]::WriteAllBytes('.\A4PhotoID_0.6_source.zip',[Convert]::FromBase64String($b64))
           Expand-Archive -Path .\A4PhotoID_0.6_source.zip -DestinationPath .\buildsrc -Force
           Write-Host "Source archive restored successfully"
-      - name: Patch compile issues
+      - name: Patch compile and installer issues
         shell: powershell
         run: |
           $root = '.\buildsrc\A4PhotoID\src\A4PhotoID'
@@ -49,6 +49,11 @@ jobs:
               Set-Content -Path $path -Value $src -Encoding UTF8
             }
           }
+
+          $installerScript = '.\buildsrc\A4PhotoID\build-installer.ps1'
+          $script = Get-Content $installerScript -Raw
+          $script = $script.Replace('$makensis = $possible[0]', '$makensis = if ($possible -is [array]) { $possible[0] } else { $possible }')
+          Set-Content -Path $installerScript -Value $script -Encoding UTF8
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
