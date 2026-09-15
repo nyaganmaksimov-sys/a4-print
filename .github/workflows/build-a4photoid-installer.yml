@@ -54,6 +54,12 @@ jobs:
           $script = Get-Content $installerScript -Raw
           $script = $script.Replace('$makensis = $possible[0]', '$makensis = if ($possible -is [array]) { $possible[0] } else { $possible }')
           Set-Content -Path $installerScript -Value $script -Encoding UTF8
+      - name: Upload patched source
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-Patched-Source
+          path: buildsrc\A4PhotoID
+          if-no-files-found: error
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
