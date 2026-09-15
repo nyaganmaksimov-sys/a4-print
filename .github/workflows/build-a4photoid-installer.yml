@@ -100,7 +100,7 @@ jobs:
 
           $csproj = '.\buildsrc\A4PhotoID\src\A4PhotoID\A4PhotoID.csproj'
           $projectText = Get-Content $csproj -Raw
-          if ($projectText -notmatch '<Version>0\.7\.0</Version>') { throw 'Version 0.7.0 was not applied' }
+          if (-not $projectText.Contains('<Version>0.7.0</Version>')) { throw 'Version 0.7.0 was not applied' }
           Write-Host "A4 PhotoID 0.7 patch applied successfully"
 
       - name: Setup .NET 10
