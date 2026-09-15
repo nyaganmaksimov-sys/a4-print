@@ -1,0 +1,49 @@
+name: Build A4 PhotoID 2.2 Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - a4photoid-v07-build
+    paths:
+      - 'v22/**'
+      - '.github/workflows/build-a4photoid-22-installer.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install NSIS
+        shell: powershell
+        run: choco install nsis -y --no-progress
+
+      - name: Rebuild source and build A4 PhotoID 2.2
+        shell: powershell
+        run: |
+          $b64=[regex]::Replace((Get-Content '.\v22\build22.ps1.gz.b64' -Raw),'\s','')
+          [IO.File]::WriteAllBytes('.\build22.ps1.gz',[Convert]::FromBase64String($b64))
+          $i=[IO.File]::OpenRead('.\build22.ps1.gz')
+          try {
+            $g=New-Object IO.Compression.GzipStream($i,[IO.Compression.CompressionMode]::Decompress)
+            try {
+              $o=[IO.File]::Create('.\build22.ps1')
+              try {$g.CopyTo($o)} finally {$o.Dispose()}
+            } finally {$g.Dispose()}
+          } finally {$i.Dispose()}
+          .\build22.ps1
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-2.2.0-Windows-Installer
+          path: buildsrc\A4PhotoID\dist\A4PhotoID_Setup_2.2.0_win-x64.exe
+          if-no-files-found: error
