@@ -1,0 +1,153 @@
+name: Build A4 PhotoID 2.1 Installer
+
+on:
+  push:
+    branches:
+      - a4photoid-v07-build
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rebuild A4 PhotoID 0.6 baseline
+        shell: powershell
+        run: |
+          $chunks = @()
+          for ($i = 0; $i -lt 8; $i++) {
+            if ($i -eq 5) {
+              $fixed = (Get-ChildItem .\p05fix.*.txt | Sort-Object Name | ForEach-Object { Get-Content $_ -Raw }) -join ''
+              if ($fixed.Length -ne 16497) { throw "part05 repair length is $($fixed.Length), expected 16497" }
+              $chunks += $fixed
+            } else {
+              $chunks += Get-Content ('.\a4photoid-src.part{0:D2}.b64' -f $i) -Raw
+            }
+          }
+          $b64 = $chunks -join ''
+          if ($b64.Length -ne 131972) { throw "combined Base64 length is $($b64.Length), expected 131972" }
+          [IO.File]::WriteAllBytes('.\A4PhotoID_0.6_source.zip',[Convert]::FromBase64String($b64))
+          Expand-Archive -Path .\A4PhotoID_0.6_source.zip -DestinationPath .\buildsrc -Force
+
+      - name: Apply baseline compile fixes
+        shell: powershell
+        run: |
+          $root = '.\buildsrc\A4PhotoID\src\A4PhotoID'
+          $face = Join-Path $root 'Services\WindowsFaceDetectionService.cs'
+          $text = Get-Content $face -Raw
+          $text = $text.Replace('var decoder = await BitmapDecoder.CreateAsync(stream);','var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream);')
+          $text = $text.Replace('encoder.Frames.Add(BitmapFrame.Create(source));','encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(source));')
+          Set-Content -Path $face -Value $text -Encoding UTF8
+          foreach ($rel in @('Services\JobHistoryService.cs','Services\DocumentTemplateRepository.cs','ViewModels\MainViewModel.cs')) {
+            $path = Join-Path $root $rel
+            $src = Get-Content $path -Raw
+            if (-not $src.StartsWith('using System.IO;')) {
+              $src = "using System.IO;`r`n" + $src
+              Set-Content -Path $path -Value $src -Encoding UTF8
+            }
+          }
+          $installerScript = '.\buildsrc\A4PhotoID\build-installer.ps1'
+          $script = Get-Content $installerScript -Raw
+          $script = $script.Replace('$makensis = $possible[0]', '$makensis = if ($possible -is [array]) { $possible[0] } else { $possible }')
+          Set-Content -Path $installerScript -Value $script -Encoding UTF8
+
+      - name: Apply A4 PhotoID 0.7 patch
+        shell: powershell
+        run: |
+          $parts = @('.\v07\patch.part00.b64','.\v07\p01fix00.b64','.\v07\p01fix01.b64','.\v07\p01fix02.b64','.\v07\p01fix03.b64','.\v07\p01fix04.b64','.\v07\gp02.b64','.\v07\gp03.b64','.\v07\p04fix00.b64','.\v07\p04fix01.b64','.\v07\p04fix02.b64','.\v07\p04fix03.b64','.\v07\gp05.b64')
+          $b64 = ($parts | ForEach-Object { Get-Content $_ -Raw }) -join ''
+          if ($b64.Length -ne 24612) { throw "0.7 patch length $($b64.Length)" }
+          [IO.File]::WriteAllBytes('.\p.gz',[Convert]::FromBase64String($b64))
+          $i=[IO.File]::OpenRead('.\p.gz'); try {$g=New-Object IO.Compression.GzipStream($i,[IO.Compression.CompressionMode]::Decompress); try {$o=[IO.File]::Create('.\p.patch'); try {$g.CopyTo($o)} finally {$o.Dispose()}} finally {$g.Dispose()}} finally {$i.Dispose()}
+          git apply --check --directory=buildsrc/A4PhotoID .\p.patch
+          if ($LASTEXITCODE -ne 0) { throw '0.7 patch check failed' }
+          git apply --whitespace=nowarn --directory=buildsrc/A4PhotoID .\p.patch
+          if ($LASTEXITCODE -ne 0) { throw '0.7 patch failed' }
+
+      - name: Apply A4 PhotoID 0.7.1 patch
+        shell: powershell
+        run: |
+          $b64=[regex]::Replace(((Get-Content '.\v071\stab00.b64' -Raw)+(Get-Content '.\v071\stab01.b64' -Raw)),'\s','')
+          if ($b64.Length -ne 8812) { throw "0.7.1 patch length $($b64.Length)" }
+          [IO.File]::WriteAllBytes('.\p.gz',[Convert]::FromBase64String($b64))
+          $i=[IO.File]::OpenRead('.\p.gz'); try {$g=New-Object IO.Compression.GzipStream($i,[IO.Compression.CompressionMode]::Decompress); try {$o=[IO.File]::Create('.\p.patch'); try {$g.CopyTo($o)} finally {$o.Dispose()}} finally {$g.Dispose()}} finally {$i.Dispose()}
+          git apply --check --directory=buildsrc/A4PhotoID .\p.patch
+          if ($LASTEXITCODE -ne 0) { throw '0.7.1 patch check failed' }
+          git apply --whitespace=nowarn --directory=buildsrc/A4PhotoID .\p.patch
+          if ($LASTEXITCODE -ne 0) { throw '0.7.1 patch failed' }
+
+      - name: Apply A4 PhotoID 0.7.2 patch
+        shell: powershell
+        run: |
+          $b64=[regex]::Replace(((Get-Content '.\v072\patch00.b64' -Raw)+(Get-Content '.\v072\patch01.b64' -Raw)),'\s','')
+          if ($b64.Length -ne 9900) { throw "0.7.2 patch length $($b64.Length)" }
+          [IO.File]::WriteAllBytes('.\p.gz',[Convert]::FromBase64String($b64))
+          $i=[IO.File]::OpenRead('.\p.gz'); try {$g=New-Object IO.Compression.GzipStream($i,[IO.Compression.CompressionMode]::Decompress); try {$o=[IO.File]::Create('.\p.patch'); try {$g.CopyTo($o)} finally {$o.Dispose()}} finally {$g.Dispose()}} finally {$i.Dispose()}
+          git apply --check --directory=buildsrc/A4PhotoID .\p.patch
+          if ($LASTEXITCODE -ne 0) { throw '0.7.2 patch check failed' }
+          git apply --whitespace=nowarn --directory=buildsrc/A4PhotoID .\p.patch
+          if ($LASTEXITCODE -ne 0) { throw '0.7.2 patch failed' }
+
+      - name: Apply A4 PhotoID 2.0 patch
+        shell: powershell
+        run: |
+          $b64=[regex]::Replace(((Get-Content '.\v20\patch.part00.b64' -Raw)+(Get-Content '.\v20\patch.part01.b64' -Raw)+(Get-Content '.\v20\patch.part02.b64' -Raw)+(Get-Content '.\v20\patch.part03.b64' -Raw)),'\s','')
+          if ($b64.Length -ne 14112) { throw "2.0 patch length $($b64.Length)" }
+          [IO.File]::WriteAllBytes('.\p.gz',[Convert]::FromBase64String($b64))
+          $i=[IO.File]::OpenRead('.\p.gz'); try {$g=New-Object IO.Compression.GzipStream($i,[IO.Compression.CompressionMode]::Decompress); try {$o=[IO.File]::Create('.\p.patch'); try {$g.CopyTo($o)} finally {$o.Dispose()}} finally {$g.Dispose()}} finally {$i.Dispose()}
+          git apply --check --directory=buildsrc/A4PhotoID .\p.patch
+          if ($LASTEXITCODE -ne 0) { throw '2.0 patch check failed' }
+          git apply --whitespace=nowarn --directory=buildsrc/A4PhotoID .\p.patch
+          if ($LASTEXITCODE -ne 0) { throw '2.0 patch failed' }
+          $path='.\buildsrc\A4PhotoID\src\A4PhotoID\Services\WindowsVideoCaptureService.cs'
+          $src=Get-Content $path -Raw
+          $src=$src.Replace('var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, randomAccess);','var encoder = await Windows.Graphics.Imaging.BitmapEncoder.CreateAsync(Windows.Graphics.Imaging.BitmapEncoder.JpegEncoderId, randomAccess);')
+          Set-Content -Path $path -Value $src -Encoding UTF8
+
+      - name: Apply A4 PhotoID 2.1 patch
+        shell: powershell
+        run: |
+          $parts=0..5 | ForEach-Object { '.\v21\patch.part{0:D2}.b64' -f $_ }
+          $b64=[regex]::Replace((($parts | ForEach-Object { Get-Content $_ -Raw }) -join ''),'\s','')
+          if ($b64.Length -ne 20676) { throw "2.1 patch length $($b64.Length), expected 20676" }
+          [IO.File]::WriteAllBytes('.\v21.patch.gz',[Convert]::FromBase64String($b64))
+          $i=[IO.File]::OpenRead('.\v21.patch.gz'); try {$g=New-Object IO.Compression.GzipStream($i,[IO.Compression.CompressionMode]::Decompress); try {$o=[IO.File]::Create('.\v21.patch'); try {$g.CopyTo($o)} finally {$o.Dispose()}} finally {$g.Dispose()}} finally {$i.Dispose()}
+          git apply --check --directory=buildsrc/A4PhotoID .\v21.patch
+          if ($LASTEXITCODE -ne 0) { throw '2.1 patch check failed' }
+          git apply --whitespace=nowarn --directory=buildsrc/A4PhotoID .\v21.patch
+          if ($LASTEXITCODE -ne 0) { throw '2.1 patch failed' }
+          $projectText=Get-Content '.\buildsrc\A4PhotoID\src\A4PhotoID\A4PhotoID.csproj' -Raw
+          if (-not $projectText.Contains('<Version>2.1.0</Version>')) { throw '2.1 version not applied' }
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install NSIS
+        shell: powershell
+        run: choco install nsis -y --no-progress
+
+      - name: Build A4 PhotoID 2.1 installer
+        shell: powershell
+        run: .\buildsrc\A4PhotoID\build-installer.ps1
+
+      - name: Verify installer
+        shell: powershell
+        run: |
+          $installer='.\buildsrc\A4PhotoID\dist\A4PhotoID_Setup_2.1.0_win-x64.exe'
+          if (-not (Test-Path $installer)) { throw "Installer not found: $installer" }
+          $item=Get-Item $installer
+          if ($item.Length -lt 1000000) { throw "Installer unexpectedly small: $($item.Length)" }
+          Get-FileHash $installer -Algorithm SHA256 | Format-List
+          Write-Host "Installer size: $($item.Length) bytes"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-2.1.0-Windows-Installer
+          path: buildsrc\A4PhotoID\dist\A4PhotoID_Setup_2.1.0_win-x64.exe
+          if-no-files-found: error
