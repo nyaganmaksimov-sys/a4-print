@@ -1,4 +1,4 @@
-name: Build A4 PhotoID 0.7.1 Installer
+name: Build A4 PhotoID 0.7.2 Installer
 
 on:
   push:
@@ -129,6 +129,34 @@ jobs:
           }
           Write-Host "A4 PhotoID 0.7.1 stabilization patch applied"
 
+      - name: Apply A4 PhotoID 0.7.2 operator workflow patch
+        shell: powershell
+        run: |
+          $patchB64 = ((Get-Content '.\v072\patch00.b64' -Raw) + (Get-Content '.\v072\patch01.b64' -Raw)) -replace '\s',''
+          if ($patchB64.Length -ne 9900) { throw "0.7.2 patch Base64 length is $($patchB64.Length), expected 9900" }
+
+          [IO.File]::WriteAllBytes('.\v072.patch.gz', [Convert]::FromBase64String($patchB64))
+          $input = [IO.File]::OpenRead('.\v072.patch.gz')
+          try {
+            $gzip = New-Object IO.Compression.GzipStream($input, [IO.Compression.CompressionMode]::Decompress)
+            try {
+              $output = [IO.File]::Create('.\v072.patch')
+              try { $gzip.CopyTo($output) } finally { $output.Dispose() }
+            } finally { $gzip.Dispose() }
+          } finally { $input.Dispose() }
+
+          git apply --check --directory=buildsrc/A4PhotoID .\v072.patch
+          if ($LASTEXITCODE -ne 0) { throw '0.7.2 git apply --check failed' }
+          git apply --whitespace=nowarn --directory=buildsrc/A4PhotoID .\v072.patch
+          if ($LASTEXITCODE -ne 0) { throw '0.7.2 git apply failed' }
+
+          $projectText = Get-Content '.\buildsrc\A4PhotoID\src\A4PhotoID\A4PhotoID.csproj' -Raw
+          if (-not $projectText.Contains('<Version>0.7.2</Version>')) {
+            Write-Host $projectText
+            throw 'A4 PhotoID 0.7.2 patch did not update the restored project'
+          }
+          Write-Host "A4 PhotoID 0.7.2 operator workflow patch applied"
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
@@ -138,14 +166,14 @@ jobs:
         shell: powershell
         run: choco install nsis -y --no-progress
 
-      - name: Build A4 PhotoID 0.7.1 installer
+      - name: Build A4 PhotoID 0.7.2 installer
         shell: powershell
         run: .\buildsrc\A4PhotoID\build-installer.ps1
 
       - name: Verify installer
         shell: powershell
         run: |
-          $installer = '.\buildsrc\A4PhotoID\dist\A4PhotoID_Setup_0.7.1_win-x64.exe'
+          $installer = '.\buildsrc\A4PhotoID\dist\A4PhotoID_Setup_0.7.2_win-x64.exe'
           if (-not (Test-Path $installer)) { throw "Installer not found: $installer" }
           $item = Get-Item $installer
           if ($item.Length -lt 1000000) { throw "Installer is unexpectedly small: $($item.Length) bytes" }
@@ -155,6 +183,6 @@ jobs:
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
-          name: A4PhotoID-0.7.1-Windows-Installer
-          path: buildsrc\A4PhotoID\dist\A4PhotoID_Setup_0.7.1_win-x64.exe
+          name: A4PhotoID-0.7.2-Windows-Installer
+          path: buildsrc\A4PhotoID\dist\A4PhotoID_Setup_0.7.2_win-x64.exe
           if-no-files-found: error
