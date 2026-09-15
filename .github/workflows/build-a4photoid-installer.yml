@@ -13,6 +13,31 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      - name: Diagnose source chunks
+        shell: powershell
+        run: |
+          function Sha1([string]$text) {
+            $bytes = [Text.Encoding]::UTF8.GetBytes($text)
+            $sha = [Security.Cryptography.SHA1]::Create()
+            (($sha.ComputeHash($bytes) | ForEach-Object ToString x2) -join '')
+          }
+          $parts = Get-ChildItem .\a4photoid-src.part*.b64 | Sort-Object Name
+          foreach ($p in $parts) {
+            $t = Get-Content $p -Raw
+            Write-Host "$($p.Name) len=$($t.Length) sha1=$(Sha1 $t)"
+          }
+          $t = Get-Content .\a4photoid-src.part05.b64 -Raw
+          for ($n=1024; $n -le 16384; $n+=1024) {
+            if ($t.Length -ge $n) { Write-Host "part05 prefix $n sha1=$(Sha1 $t.Substring(0,$n))" }
+          }
+      - name: Rebuild source archive
+        shell: powershell
+        run: |
+          $parts = Get-ChildItem .\a4photoid-src.part*.b64 | Sort-Object Name
+          $b64 = ($parts | ForEach-Object { Get-Content $_ -Raw }) -join ''
+          Write-Host "combined length=$($b64.Length)"
+          [IO.File]::WriteAllBytes('.\A4PhotoID_0.6_source.zip',[Convert]::FromBase64String($b64))
+          Expand-Archive -Path .\A4PhotoID_0.6_source.zip -DestinationPath .\buildsrc -Force
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
@@ -20,13 +45,6 @@ jobs:
       - name: Install NSIS
         shell: powershell
         run: choco install nsis -y --no-progress
-      - name: Rebuild source archive
-        shell: powershell
-        run: |
-          $parts = Get-ChildItem .\a4photoid-src.part*.b64 | Sort-Object Name
-          $b64 = ($parts | ForEach-Object { Get-Content $_ -Raw }) -join ''
-          [IO.File]::WriteAllBytes('.\A4PhotoID_0.6_source.zip',[Convert]::FromBase64String($b64))
-          Expand-Archive -Path .\A4PhotoID_0.6_source.zip -DestinationPath .\buildsrc -Force
       - name: Build installer
         shell: powershell
         run: .\buildsrc\A4PhotoID\build-installer.ps1
