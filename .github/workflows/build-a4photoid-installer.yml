@@ -31,6 +31,24 @@ jobs:
           [IO.File]::WriteAllBytes('.\A4PhotoID_0.6_source.zip',[Convert]::FromBase64String($b64))
           Expand-Archive -Path .\A4PhotoID_0.6_source.zip -DestinationPath .\buildsrc -Force
           Write-Host "Source archive restored successfully"
+      - name: Patch compile issues
+        shell: powershell
+        run: |
+          $root = '.\buildsrc\A4PhotoID\src\A4PhotoID'
+          $face = Join-Path $root 'Services\WindowsFaceDetectionService.cs'
+          $text = Get-Content $face -Raw
+          $text = $text.Replace('var decoder = await BitmapDecoder.CreateAsync(stream);','var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream);')
+          $text = $text.Replace('encoder.Frames.Add(BitmapFrame.Create(source));','encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(source));')
+          Set-Content -Path $face -Value $text -Encoding UTF8
+
+          foreach ($rel in @('Services\JobHistoryService.cs','Services\DocumentTemplateRepository.cs','ViewModels\MainViewModel.cs')) {
+            $path = Join-Path $root $rel
+            $src = Get-Content $path -Raw
+            if (-not $src.StartsWith('using System.IO;')) {
+              $src = "using System.IO;`r`n" + $src
+              Set-Content -Path $path -Value $src -Encoding UTF8
+            }
+          }
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
