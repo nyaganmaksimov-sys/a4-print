@@ -21,13 +21,9 @@ jobs:
             $sha = [Security.Cryptography.SHA1]::Create()
             (($sha.ComputeHash($bytes) | ForEach-Object ToString x2) -join '')
           }
-          $parts = Get-ChildItem .\a4photoid-src.part*.b64 | Sort-Object Name
-          foreach ($p in $parts) {
-            $t = Get-Content $p -Raw
-            Write-Host "$($p.Name) len=$($t.Length) sha1=$(Sha1 $t)"
-          }
           $t = Get-Content .\a4photoid-src.part05.b64 -Raw
-          for ($n=1024; $n -le 16384; $n+=1024) {
+          Write-Host "part05 len=$($t.Length)"
+          for ($n=4096; $n -le 5120; $n+=64) {
             if ($t.Length -ge $n) { Write-Host "part05 prefix $n sha1=$(Sha1 $t.Substring(0,$n))" }
           }
       - name: Rebuild source archive
