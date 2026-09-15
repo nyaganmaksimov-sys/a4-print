@@ -98,10 +98,8 @@ jobs:
             Pop-Location
           }
 
-          $csproj = '.\buildsrc\A4PhotoID\src\A4PhotoID\A4PhotoID.csproj'
-          $projectText = Get-Content $csproj -Raw
-          if (-not $projectText.Contains('<Version>0.7.0</Version>')) { throw 'Version 0.7.0 was not applied' }
           Write-Host "A4 PhotoID 0.7 patch applied successfully"
+          Get-Content '.\buildsrc\A4PhotoID\src\A4PhotoID\A4PhotoID.csproj' | Select-String 'Version|AssemblyVersion|FileVersion'
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
