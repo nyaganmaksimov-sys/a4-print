@@ -103,7 +103,8 @@ jobs:
       - name: Apply A4 PhotoID 0.7.1 stabilization patch
         shell: powershell
         run: |
-          $stabilizationB64 = ((Get-Content '.\v071\stab00.b64' -Raw) + (Get-Content '.\v071\stab01.b64' -Raw)) -replace '\s',''
+          $rawStabilization = (Get-Content '.\v071\stab00.b64' -Raw) + (Get-Content '.\v071\stab01.b64' -Raw)
+          $stabilizationB64 = [regex]::Replace($rawStabilization, '\s', '')
           if ($stabilizationB64.Length -ne 8812) { throw "0.7.1 stabilization Base64 length is $($stabilizationB64.Length), expected 8812" }
 
           [IO.File]::WriteAllBytes('.\v071.patch.gz', [Convert]::FromBase64String($stabilizationB64))
