@@ -1,9 +1,9 @@
-name: Build A4 PhotoID Installer
+name: Build A4 PhotoID 0.7 Installer
 
 on:
   push:
     branches:
-      - a4photoid-installer-build
+      - a4photoid-v07-build
   workflow_dispatch:
 
 jobs:
@@ -13,7 +13,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Rebuild source archive
+
+      - name: Rebuild A4 PhotoID 0.6 baseline
         shell: powershell
         run: |
           $chunks = @()
@@ -30,8 +31,9 @@ jobs:
           if ($b64.Length -ne 131972) { throw "combined Base64 length is $($b64.Length), expected 131972" }
           [IO.File]::WriteAllBytes('.\A4PhotoID_0.6_source.zip',[Convert]::FromBase64String($b64))
           Expand-Archive -Path .\A4PhotoID_0.6_source.zip -DestinationPath .\buildsrc -Force
-          Write-Host "Source archive restored successfully"
-      - name: Patch compile and installer issues
+          Write-Host "A4 PhotoID 0.6 baseline restored"
+
+      - name: Apply baseline compile fixes
         shell: powershell
         run: |
           $root = '.\buildsrc\A4PhotoID\src\A4PhotoID'
@@ -54,25 +56,72 @@ jobs:
           $script = Get-Content $installerScript -Raw
           $script = $script.Replace('$makensis = $possible[0]', '$makensis = if ($possible -is [array]) { $possible[0] } else { $possible }')
           Set-Content -Path $installerScript -Value $script -Encoding UTF8
-      - name: Upload patched source
-        uses: actions/upload-artifact@v4
-        with:
-          name: A4PhotoID-Patched-Source
-          path: buildsrc\A4PhotoID
-          if-no-files-found: error
+
+      - name: Rebuild and apply A4 PhotoID 0.7 patch
+        shell: powershell
+        run: |
+          $patchParts = @(
+            '.\v07\patch.part00.b64',
+            '.\v07\gp01.b64',
+            '.\v07\gp02.b64',
+            '.\v07\gp03.b64',
+            '.\v07\gp04.b64',
+            '.\v07\gp05.b64'
+          )
+          $patchB64 = ($patchParts | ForEach-Object { Get-Content $_ -Raw }) -join ''
+          if ($patchB64.Length -ne 24612) { throw "0.7 patch Base64 length is $($patchB64.Length), expected 24612" }
+
+          [IO.File]::WriteAllBytes('.\v07.patch.gz', [Convert]::FromBase64String($patchB64))
+          $input = [IO.File]::OpenRead('.\v07.patch.gz')
+          try {
+            $gzip = New-Object IO.Compression.GzipStream($input, [IO.Compression.CompressionMode]::Decompress)
+            try {
+              $output = [IO.File]::Create('.\v07.patch')
+              try { $gzip.CopyTo($output) } finally { $output.Dispose() }
+            } finally { $gzip.Dispose() }
+          } finally { $input.Dispose() }
+
+          Push-Location '.\buildsrc\A4PhotoID'
+          try {
+            git apply --check '..\..\v07.patch'
+            if ($LASTEXITCODE -ne 0) { throw 'git apply --check failed' }
+            git apply --whitespace=nowarn '..\..\v07.patch'
+            if ($LASTEXITCODE -ne 0) { throw 'git apply failed' }
+          } finally {
+            Pop-Location
+          }
+
+          $csproj = '.\buildsrc\A4PhotoID\src\A4PhotoID\A4PhotoID.csproj'
+          $projectText = Get-Content $csproj -Raw
+          if ($projectText -notmatch '<Version>0\.7\.0</Version>') { throw 'Version 0.7.0 was not applied' }
+          Write-Host "A4 PhotoID 0.7 patch applied successfully"
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+
       - name: Install NSIS
         shell: powershell
         run: choco install nsis -y --no-progress
-      - name: Build installer
+
+      - name: Build A4 PhotoID 0.7 installer
         shell: powershell
         run: .\buildsrc\A4PhotoID\build-installer.ps1
+
+      - name: Verify installer
+        shell: powershell
+        run: |
+          $installer = '.\buildsrc\A4PhotoID\dist\A4PhotoID_Setup_0.7.0_win-x64.exe'
+          if (-not (Test-Path $installer)) { throw "Installer not found: $installer" }
+          $item = Get-Item $installer
+          if ($item.Length -lt 1000000) { throw "Installer is unexpectedly small: $($item.Length) bytes" }
+          Get-FileHash $installer -Algorithm SHA256 | Format-List
+          Write-Host "Installer size: $($item.Length) bytes"
+
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
-          name: A4PhotoID-Windows-Installer
-          path: buildsrc\A4PhotoID\dist\A4PhotoID_Setup_0.6.0_win-x64.exe
+          name: A4PhotoID-0.7-Windows-Installer
+          path: buildsrc\A4PhotoID\dist\A4PhotoID_Setup_0.7.0_win-x64.exe
           if-no-files-found: error
