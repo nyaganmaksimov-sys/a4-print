@@ -157,6 +157,14 @@ jobs:
           }
           Write-Host "A4 PhotoID 0.7.2 operator workflow patch applied"
 
+      - name: Apply 0.7.2 Windows camera compile hotfix
+        shell: powershell
+        run: |
+          $path = '.\buildsrc\A4PhotoID\src\A4PhotoID\Services\WindowsVideoCaptureService.cs'
+          $src = Get-Content $path -Raw
+          $src = $src.Replace('var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, randomAccess);', 'var encoder = await Windows.Graphics.Imaging.BitmapEncoder.CreateAsync(Windows.Graphics.Imaging.BitmapEncoder.JpegEncoderId, randomAccess);')
+          Set-Content -Path $path -Value $src -Encoding UTF8
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
