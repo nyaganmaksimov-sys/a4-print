@@ -1,0 +1,38 @@
+name: Build A4 PhotoID Installer
+
+on:
+  push:
+    branches:
+      - a4photoid-installer-build
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install NSIS
+        shell: powershell
+        run: choco install nsis -y --no-progress
+      - name: Rebuild source archive
+        shell: powershell
+        run: |
+          $parts = Get-ChildItem .\a4photoid-src.part*.b64 | Sort-Object Name
+          $b64 = ($parts | ForEach-Object { Get-Content $_ -Raw }) -join ''
+          [IO.File]::WriteAllBytes('.\A4PhotoID_0.6_source.zip',[Convert]::FromBase64String($b64))
+          Expand-Archive -Path .\A4PhotoID_0.6_source.zip -DestinationPath .\buildsrc -Force
+      - name: Build installer
+        shell: powershell
+        run: .\buildsrc\A4PhotoID\build-installer.ps1
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-Windows-Installer
+          path: buildsrc\A4PhotoID\dist\A4PhotoID_Setup_0.6.0_win-x64.exe
+          if-no-files-found: error
