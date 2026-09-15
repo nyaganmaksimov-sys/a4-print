@@ -13,20 +13,24 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Diagnose source chunks
-        shell: powershell
-        run: |
-          $t = Get-Content .\a4photoid-src.part05.b64 -Raw
-          Write-Host "part05 len=$($t.Length)"
-          Write-Host "part05 slice=$($t.Substring(4320,140))"
       - name: Rebuild source archive
         shell: powershell
         run: |
-          $parts = Get-ChildItem .\a4photoid-src.part*.b64 | Sort-Object Name
-          $b64 = ($parts | ForEach-Object { Get-Content $_ -Raw }) -join ''
-          Write-Host "combined length=$($b64.Length)"
+          $chunks = @()
+          for ($i = 0; $i -lt 8; $i++) {
+            if ($i -eq 5) {
+              $fixed = (Get-ChildItem .\p05fix.*.txt | Sort-Object Name | ForEach-Object { Get-Content $_ -Raw }) -join ''
+              if ($fixed.Length -ne 16497) { throw "part05 repair length is $($fixed.Length), expected 16497" }
+              $chunks += $fixed
+            } else {
+              $chunks += Get-Content ('.\a4photoid-src.part{0:D2}.b64' -f $i) -Raw
+            }
+          }
+          $b64 = $chunks -join ''
+          if ($b64.Length -ne 131972) { throw "combined Base64 length is $($b64.Length), expected 131972" }
           [IO.File]::WriteAllBytes('.\A4PhotoID_0.6_source.zip',[Convert]::FromBase64String($b64))
           Expand-Archive -Path .\A4PhotoID_0.6_source.zip -DestinationPath .\buildsrc -Force
+          Write-Host "Source archive restored successfully"
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
