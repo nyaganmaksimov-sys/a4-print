@@ -160,7 +160,7 @@ jobs:
       - name: Apply A4 PhotoID 2.0 interface patch
         shell: powershell
         run: |
-          $b64 = [regex]::Replace((Get-Content '.\v20\patch00.b64' -Raw), '\s', '')
+          $b64 = [regex]::Replace(((Get-Content '.\v20\patch.part00.b64' -Raw) + (Get-Content '.\v20\patch.part01.b64' -Raw) + (Get-Content '.\v20\patch.part02.b64' -Raw) + (Get-Content '.\v20\patch.part03.b64' -Raw)), '\s', '')
           if ($b64.Length -ne 14112) { throw "2.0 patch Base64 length is $($b64.Length), expected 14112" }
           [IO.File]::WriteAllBytes('.\v20.patch.gz', [Convert]::FromBase64String($b64))
           $input = [IO.File]::OpenRead('.\v20.patch.gz')
