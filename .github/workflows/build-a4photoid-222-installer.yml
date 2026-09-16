@@ -69,7 +69,7 @@ jobs:
             '    ${EndIf}',
             '',
             '    nsExec::Exec ''"$SYSDIR\taskkill.exe" /F /T /IM A4PhotoID.exe''',
-            '    Pop $0',
+            '    Pop $$0',
             '    Sleep 700',
             'FunctionEnd'
           )
