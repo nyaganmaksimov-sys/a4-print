@@ -1,3 +1,4 @@
+# Stable updater build: closes old app process and does not auto-launch from NSIS.
 name: Build A4 PhotoID 2.2.2 Installer
 
 on:
@@ -62,8 +63,7 @@ jobs:
           $nsiText = [regex]::Replace($nsiText, '(?m)^!define MUI_FINISHPAGE_RUN_TEXT .*\r?\n', '')
 
           # Before replacing the self-contained application files, make sure an older
-          # A4PhotoID process is not holding the EXE/DLLs open. taskkill is hidden by
-          # nsExec and a "process not found" return code is intentionally ignored.
+          # A4PhotoID process is not holding the EXE/DLLs open.
           $newInit = @'
 Function .onInit
     ${IfNot} ${RunningX64}
@@ -78,12 +78,10 @@ FunctionEnd
 '@
           $nsiText = [regex]::Replace($nsiText, '(?s)Function \.onInit.*?FunctionEnd', $newInit)
 
-          # Explicit overwrite mode makes update installs deterministic.
           if ($nsiText -notmatch '(?m)^SetOverwrite on$') {
             $nsiText = $nsiText.Replace('SetCompressor /SOLID lzma', "SetCompressor /SOLID lzma`r`nSetOverwrite on")
           }
 
-          # Keep the script Unicode-safe.
           [System.IO.File]::WriteAllText($nsi, $nsiText, (New-Object System.Text.UTF8Encoding($true)))
 
           $build = Join-Path $root 'build-installer.ps1'
