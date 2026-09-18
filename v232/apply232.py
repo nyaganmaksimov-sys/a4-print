@@ -22,7 +22,7 @@ p=root/'build-installer.ps1'; s=read(p).replace('A4PhotoID_Setup_2.3.1_win-x64.e
 write(root/'src/A4PhotoID/Services/SettingsService.cs', '''using System.IO;\nusing System.Text.Json;\n\nnamespace A4PhotoID.Services;\n\npublic sealed class SettingsService\n{\n    private readonly string _settingsPath;\n\n    public SettingsService()\n    {\n        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "A4PhotoID");\n        Directory.CreateDirectory(dir);\n        _settingsPath = Path.Combine(dir, "settings.json");\n    }\n\n    public string LoadSaveDirectory()\n    {\n        try\n        {\n            if (!File.Exists(_settingsPath)) return DefaultSaveDirectory();\n            var json = File.ReadAllText(_settingsPath);\n            var data = JsonSerializer.Deserialize<AppSettings>(json);\n            return string.IsNullOrWhiteSpace(data?.SaveDirectory) ? DefaultSaveDirectory() : data.SaveDirectory;\n        }\n        catch\n        {\n            return DefaultSaveDirectory();\n        }\n    }\n\n    public void SaveSaveDirectory(string? directory)\n    {\n        try\n        {\n            var value = string.IsNullOrWhiteSpace(directory) ? DefaultSaveDirectory() : directory.Trim();\n            var json = JsonSerializer.Serialize(new AppSettings { SaveDirectory = value }, new JsonSerializerOptions { WriteIndented = true });\n            File.WriteAllText(_settingsPath, json);\n        }\n        catch\n        {\n        }\n    }\n\n    private static string DefaultSaveDirectory() =>\n        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "A4 PhotoID");\n\n    private sealed class AppSettings\n    {\n        public string SaveDirectory { get; set; } = string.Empty;\n    }\n}\n''')
 
 p=root/'src/A4PhotoID/Services/ImageExportService.cs'; s=read(p)
-s=sub1(s, r'public string SaveJpeg\\(BitmapSource source, string filePrefix\\)\\s*\\{.*?using var stream = File\\.Create\\(path\\);',
+s=sub1(s, r'public string SaveJpeg\(BitmapSource source, string filePrefix\)\s*\{.*?using var stream = File\.Create\(path\);',
 '''public string SaveJpeg(BitmapSource source, string filePrefix, string? destinationDirectory = null)
     {
         var safePrefix = string.Concat(filePrefix.Where(ch => !Path.GetInvalidFileNameChars().Contains(ch))).Trim();
@@ -36,7 +36,7 @@ s=sub1(s, r'public string SaveJpeg\\(BitmapSource source, string filePrefix\\)\\
 write(p,s)
 
 p=root/'src/A4PhotoID/Services/PrintLayoutService.cs'; s=read(p)
-s=sub1(s, r'public string SaveJpeg\\(BitmapSource source\\)\\s*\\{.*?using var stream = File\\.Create\\(path\\);',
+s=sub1(s, r'public string SaveJpeg\(BitmapSource source\)\s*\{.*?using var stream = File\.Create\(path\);',
 '''public string SaveJpeg(BitmapSource source, string? destinationDirectory = null)
     {
         var directory = string.IsNullOrWhiteSpace(destinationDirectory)
@@ -77,7 +77,7 @@ s=s.replace('        _previewTimer = new DispatcherTimer { Interval = TimeSpan.F
 s=s.replace('        SelectedBackgroundOption = BackgroundOptions[0];','        SelectedBackgroundOption = BackgroundOptions[0];\n        _saveDirectory = _settingsService.LoadSaveDirectory();\n        OnPropertyChanged(nameof(SaveDirectory));',1)
 s=s.replace('        ResetEditsCommand = new RelayCommand(ResetEdits);','        ResetEditsCommand = new RelayCommand(ResetEdits);\n        ResetCropCommand = new RelayCommand(ResetCrop);\n        ResetCorrectionsCommand = new RelayCommand(ResetCorrections);\n        BrowseSaveDirectoryCommand = new RelayCommand(BrowseSaveDirectory);',1)
 
-s=sub1(s, r'    private void ResetEdits\\(\\)\\s*\\{.*?\\n    \\}\\n\\n    private void ResetEditValues\\(bool resetFrame\\)',
+s=sub1(s, r'    private void ResetEdits\(\)\s*\{.*?\n    \}\n\n    private void ResetEditValues\(bool resetFrame\)',
 '''    private void ResetEdits()
     {
         ResetEditValues(resetFrame: true);
@@ -154,7 +154,7 @@ s=sub1(s, r'    private void ResetEdits\\(\\)\\s*\\{.*?\\n    \\}\\n\\n    priva
 
     private void ResetEditValues(bool resetFrame)''', 'reset methods', re.S)
 
-s=sub1(s, r'        // Clear the previous document only after the camera has successfully restarted\\..*?\\n    private async Task StopLivePreviewAsync\\(\\)',
+s=sub1(s, r'        // Clear the previous document only after the camera has successfully restarted\..*?\n    private async Task StopLivePreviewAsync\(\)',
 '''        // Keep the last prepared photo, crop and print sheet while the operator uses the viewfinder.
         // They are replaced only after a NEW frame has actually been captured successfully.
         IsLivePreviewActive = true;
