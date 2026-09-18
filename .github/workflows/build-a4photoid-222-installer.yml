@@ -16,6 +16,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Pack reconstructed 2.2 source
+        shell: powershell
+        run: |
+          if (Test-Path '.\A4PhotoID_2.2_source.zip') { Remove-Item '.\A4PhotoID_2.2_source.zip' -Force }
+          Compress-Archive -Path '.\buildsrc\A4PhotoID\*' -DestinationPath '.\A4PhotoID_2.2_source.zip' -CompressionLevel Optimal
+
+      - name: Upload reconstructed 2.2 source
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-2.2.2-Source
+          path: A4PhotoID_2.2_source.zip
+          if-no-files-found: error
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
