@@ -122,6 +122,19 @@ jobs:
           $projectText=Get-Content '.\buildsrc\A4PhotoID\src\A4PhotoID\A4PhotoID.csproj' -Raw
           if (-not $projectText.Contains('<Version>2.1.0</Version>')) { throw '2.1 version not applied' }
 
+      - name: Pack reconstructed 2.1 source
+        shell: powershell
+        run: |
+          if (Test-Path '.\A4PhotoID_2.1_source.zip') { Remove-Item '.\A4PhotoID_2.1_source.zip' -Force }
+          Compress-Archive -Path '.\buildsrc\A4PhotoID\*' -DestinationPath '.\A4PhotoID_2.1_source.zip' -CompressionLevel Optimal
+
+      - name: Upload reconstructed 2.1 source
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-2.1.0-Source
+          path: A4PhotoID_2.1_source.zip
+          if-no-files-found: error
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
