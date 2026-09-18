@@ -1,0 +1,123 @@
+name: Build A4 PhotoID 2.3.0 Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - a4photoid-v07-build
+    paths:
+      - '.github/workflows/build-a4photoid-230-installer.yml'
+      - 'v23/**'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install NSIS
+        shell: powershell
+        run: choco install nsis -y --no-progress
+
+      - name: Rebuild A4 PhotoID 2.2 baseline
+        shell: powershell
+        run: |
+          $b64=[regex]::Replace((Get-Content '.\v22\build22.ps1.gz.b64' -Raw),'\s','')
+          [IO.File]::WriteAllBytes('.\build22.ps1.gz',[Convert]::FromBase64String($b64))
+          $i=[IO.File]::OpenRead('.\build22.ps1.gz')
+          try {
+            $g=New-Object IO.Compression.GzipStream($i,[IO.Compression.CompressionMode]::Decompress)
+            try {
+              $o=[IO.File]::Create('.\build22.ps1')
+              try {$g.CopyTo($o)} finally {$o.Dispose()}
+            } finally {$g.Dispose()}
+          } finally {$i.Dispose()}
+          .\build22.ps1
+
+      - name: Apply A4 PhotoID 2.3 real-crop overlay
+        shell: powershell
+        run: |
+          $parts = Get-ChildItem '.\v23\overlay.part*.b64' | Sort-Object Name
+          if ($parts.Count -ne 5) { throw "Expected 5 overlay parts, got $($parts.Count)" }
+          $b64 = ($parts | ForEach-Object { Get-Content $_.FullName -Raw }) -join ''
+          $b64 = [regex]::Replace($b64,'\s','')
+          if ($b64.Length -ne 35124) { throw "Unexpected overlay Base64 length: $($b64.Length)" }
+          $bytes = [Convert]::FromBase64String($b64)
+          $sha = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace('-','').ToLowerInvariant()
+          if ($sha -ne 'f5aa700f126e10c4e91cf7194df2a901936e8fcf002aca9c287fc1a7d856b4ae') {
+            throw "Overlay SHA256 mismatch: $sha"
+          }
+          [IO.File]::WriteAllBytes('.\v23\A4PhotoID_2.3_overlay.zip',$bytes)
+          Expand-Archive -Path '.\v23\A4PhotoID_2.3_overlay.zip' -DestinationPath '.\buildsrc\A4PhotoID' -Force
+
+      - name: Verify 2.3 source pipeline
+        shell: powershell
+        run: |
+          $root = '.\buildsrc\A4PhotoID'
+          $csproj = Get-Content (Join-Path $root 'src\A4PhotoID\A4PhotoID.csproj') -Raw
+          $vm = Get-Content (Join-Path $root 'src\A4PhotoID\ViewModels\MainViewModel.cs') -Raw
+          $crop = Get-Content (Join-Path $root 'src\A4PhotoID\Services\PhotoCropService.cs') -Raw
+          $xaml = Get-Content (Join-Path $root 'src\A4PhotoID\MainWindow.xaml') -Raw
+          if ($csproj -notmatch '<Version>2\.3\.0</Version>') { throw 'Version 2.3.0 not applied' }
+          if ($vm -notmatch 'FinalCroppedImage = _cropService\.RenderFinalCrop') { throw 'Final crop pipeline missing' }
+          if ($vm -notmatch 'BuildSheet\(FinalCroppedImage') { throw 'Sheet is not using FinalCroppedImage' }
+          if ($vm -notmatch 'SaveJpeg\(FinalCroppedImage') { throw 'JPEG export is not using FinalCroppedImage' }
+          if ($crop -notmatch 'PushClip') { throw 'Real crop clipping is missing' }
+          if ($xaml -notmatch 'Source="{Binding FinalCroppedImage}"') { throw 'Ready-photo UI is not bound to FinalCroppedImage' }
+          Write-Host 'A4 PhotoID 2.3 source pipeline verified.'
+
+      - name: Build A4 PhotoID 2.3 installer
+        shell: powershell
+        run: |
+          $root = '.\buildsrc\A4PhotoID'
+          Remove-Item (Join-Path $root 'dist\A4PhotoID_Setup_2.2.0_win-x64.exe') -Force -ErrorAction SilentlyContinue
+          Remove-Item (Join-Path $root 'dist\A4PhotoID_Setup_2.2.1_win-x64.exe') -Force -ErrorAction SilentlyContinue
+          Remove-Item (Join-Path $root 'dist\A4PhotoID_Setup_2.2.2_win-x64.exe') -Force -ErrorAction SilentlyContinue
+          & (Join-Path $root 'build-installer.ps1')
+
+      - name: Verify installer
+        shell: powershell
+        run: |
+          $installer = '.\buildsrc\A4PhotoID\dist\A4PhotoID_Setup_2.3.0_win-x64.exe'
+          if (-not (Test-Path $installer)) { throw "Installer not found: $installer" }
+          $item = Get-Item $installer
+          if ($item.Length -lt 1000000) { throw "Installer is unexpectedly small: $($item.Length) bytes" }
+          $hash = Get-FileHash $installer -Algorithm SHA256
+          Write-Host "Installer size: $($item.Length) bytes"
+          Write-Host "Installer SHA256: $($hash.Hash.ToLowerInvariant())"
+
+      - name: Pack 2.3 source
+        shell: powershell
+        run: |
+          $root = Resolve-Path '.\buildsrc\A4PhotoID'
+          $stage = '.\A4PhotoID_2.3_source'
+          Remove-Item $stage -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          Copy-Item (Join-Path $root 'src') $stage -Recurse
+          Copy-Item (Join-Path $root 'installer') $stage -Recurse
+          Copy-Item (Join-Path $root 'build-installer.ps1') $stage
+          if (Test-Path (Join-Path $root 'README.md')) { Copy-Item (Join-Path $root 'README.md') $stage }
+          Get-ChildItem $stage -Directory -Recurse | Where-Object { $_.Name -in @('bin','obj') } | Sort-Object FullName -Descending | Remove-Item -Recurse -Force
+          Compress-Archive -Path "$stage\*" -DestinationPath '.\A4PhotoID_2.3.0_source.zip' -CompressionLevel Optimal
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-2.3.0-Windows-Installer
+          path: buildsrc\A4PhotoID\dist\A4PhotoID_Setup_2.3.0_win-x64.exe
+          if-no-files-found: error
+
+      - name: Upload source
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-2.3.0-Source
+          path: A4PhotoID_2.3.0_source.zip
+          if-no-files-found: error
