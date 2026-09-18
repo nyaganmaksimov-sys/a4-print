@@ -1,0 +1,142 @@
+name: Build A4 PhotoID 2.3.2 Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - a4photoid-v07-build
+    paths:
+      - '.github/workflows/build-a4photoid-232-installer.yml'
+      - 'v232/**'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install NSIS
+        shell: powershell
+        run: choco install nsis -y --no-progress
+
+      - name: Rebuild A4 PhotoID 2.2 baseline
+        shell: powershell
+        run: |
+          $b64=[regex]::Replace((Get-Content '.\v22\build22.ps1.gz.b64' -Raw),'\s','')
+          [IO.File]::WriteAllBytes('.\build22.ps1.gz',[Convert]::FromBase64String($b64))
+          $i=[IO.File]::OpenRead('.\build22.ps1.gz')
+          try {
+            $g=New-Object IO.Compression.GzipStream($i,[IO.Compression.CompressionMode]::Decompress)
+            try {
+              $o=[IO.File]::Create('.\build22.ps1')
+              try {$g.CopyTo($o)} finally {$o.Dispose()}
+            } finally {$g.Dispose()}
+          } finally {$i.Dispose()}
+          .\build22.ps1
+
+      - name: Apply A4 PhotoID 2.3 real-crop overlay
+        shell: powershell
+        run: |
+          $parts = Get-ChildItem '.\v23\overlay.part*.b64' | Sort-Object Name
+          if ($parts.Count -ne 5) { throw "Expected 5 v2.3 overlay parts, got $($parts.Count)" }
+          $b64 = ($parts | ForEach-Object { Get-Content $_.FullName -Raw }) -join ''
+          $b64 = [regex]::Replace($b64,'\s','')
+          $bytes = [Convert]::FromBase64String($b64)
+          $sha = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace('-','').ToLowerInvariant()
+          if ($sha -ne 'f5aa700f126e10c4e91cf7194df2a901936e8fcf002aca9c287fc1a7d856b4ae') {
+            throw "v2.3 overlay SHA256 mismatch: $sha"
+          }
+          [IO.File]::WriteAllBytes('.\A4PhotoID_2.3_overlay.zip',$bytes)
+          Expand-Archive -Path '.\A4PhotoID_2.3_overlay.zip' -DestinationPath '.\buildsrc\A4PhotoID' -Force
+
+      - name: Apply 2.3.1 Live View baseline
+        shell: powershell
+        run: python '.\v231\apply231.py'
+
+      - name: Apply 2.3.2 editor, save path and responsive UI
+        shell: powershell
+        run: python '.\v232\apply232.py'
+
+      - name: Verify 2.3.2 source behaviour
+        shell: powershell
+        run: |
+          $root = '.\buildsrc\A4PhotoID'
+          $csproj = Get-Content (Join-Path $root 'src\A4PhotoID\A4PhotoID.csproj') -Raw
+          $vm = Get-Content (Join-Path $root 'src\A4PhotoID\ViewModels\MainViewModel.cs') -Raw
+          $xaml = Get-Content (Join-Path $root 'src\A4PhotoID\MainWindow.xaml') -Raw
+          $settings = Get-Content (Join-Path $root 'src\A4PhotoID\Services\SettingsService.cs') -Raw
+          $export = Get-Content (Join-Path $root 'src\A4PhotoID\Services\ImageExportService.cs') -Raw
+          $layout = Get-Content (Join-Path $root 'src\A4PhotoID\Services\PrintLayoutService.cs') -Raw
+
+          if ($csproj -notmatch '<Version>2\.3\.2</Version>') { throw 'Version 2.3.2 not applied' }
+          if ($vm -match 'ClearCapturedPhotoForNewShot') { throw 'Live View still clears the previous photo' }
+          if ($vm -notmatch 'SaveJpeg\(FinalCroppedImage, prefix, SaveDirectory\)') { throw 'Photo save directory support missing' }
+          if ($vm -notmatch '_layoutService\.SaveJpeg\(SheetImage, SaveDirectory\)') { throw 'Sheet save directory support missing' }
+          if ($vm -notmatch 'ResetCropCommand') { throw 'Crop reset command missing' }
+          if ($vm -notmatch 'ResetCorrectionsCommand') { throw 'Correction reset command missing' }
+          if ($vm -notmatch 'BrowseSaveDirectoryCommand') { throw 'Save folder picker command missing' }
+          if ($settings -notmatch 'settings\.json') { throw 'Settings persistence missing' }
+          if ($export -notmatch 'Directory\.CreateDirectory\(directory\)') { throw 'Photo export directory creation missing' }
+          if ($layout -notmatch 'Directory\.CreateDirectory\(directory\)') { throw 'Sheet export directory creation missing' }
+          if ($xaml -notmatch 'BottomActionsRow" Height="128"') { throw 'Responsive bottom panel height missing' }
+          if ($xaml -notmatch 'UpdateSourceTrigger=PropertyChanged') { throw 'Editor live slider bindings missing' }
+          if ($xaml -notmatch 'ResetCorrectionsCommand') { throw 'Correction UI is not wired to its reset command' }
+          if ($xaml -notmatch 'BrowseSaveDirectoryCommand') { throw 'Save path UI missing' }
+          Write-Host 'A4 PhotoID 2.3.2 source behaviour verified.'
+
+      - name: Build A4 PhotoID 2.3.2 installer
+        shell: powershell
+        run: |
+          $root = '.\buildsrc\A4PhotoID'
+          Remove-Item (Join-Path $root 'dist\A4PhotoID_Setup_2.3.1_win-x64.exe') -Force -ErrorAction SilentlyContinue
+          & (Join-Path $root 'build-installer.ps1')
+
+      - name: Verify installer
+        shell: powershell
+        run: |
+          $installer = '.\buildsrc\A4PhotoID\dist\A4PhotoID_Setup_2.3.2_win-x64.exe'
+          if (-not (Test-Path $installer)) { throw "Installer not found: $installer" }
+          $item = Get-Item $installer
+          if ($item.Length -lt 1000000) { throw "Installer is unexpectedly small: $($item.Length) bytes" }
+          $hash = Get-FileHash $installer -Algorithm SHA256
+          Write-Host "Installer size: $($item.Length) bytes"
+          Write-Host "Installer SHA256: $($hash.Hash.ToLowerInvariant())"
+
+      - name: Pack 2.3.2 source
+        shell: powershell
+        run: |
+          $root = Resolve-Path '.\buildsrc\A4PhotoID'
+          $stage = '.\A4PhotoID_2.3.2_source'
+          Remove-Item $stage -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          Copy-Item (Join-Path $root 'src') $stage -Recurse
+          Copy-Item (Join-Path $root 'installer') $stage -Recurse
+          Copy-Item (Join-Path $root 'build-installer.ps1') $stage
+          if (Test-Path (Join-Path $root 'README.md')) { Copy-Item (Join-Path $root 'README.md') $stage }
+          Get-ChildItem $stage -Directory -Recurse |
+            Where-Object { $_.Name -in @('bin','obj') } |
+            Sort-Object FullName -Descending |
+            Remove-Item -Recurse -Force
+          Compress-Archive -Path "$stage\*" -DestinationPath '.\A4PhotoID_2.3.2_source.zip' -CompressionLevel Optimal
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-2.3.2-Windows-Installer
+          path: buildsrc\A4PhotoID\dist\A4PhotoID_Setup_2.3.2_win-x64.exe
+          if-no-files-found: error
+
+      - name: Upload source
+        uses: actions/upload-artifact@v4
+        with:
+          name: A4PhotoID-2.3.2-Source
+          path: A4PhotoID_2.3.2_source.zip
+          if-no-files-found: error
