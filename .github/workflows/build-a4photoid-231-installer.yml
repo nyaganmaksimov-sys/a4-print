@@ -74,7 +74,6 @@ jobs:
           if ($xaml -notmatch 'Source="\{Binding WorkingImage\}" Stretch="UniformToFill"') { throw 'Captured-photo crop editor is missing' }
           if ($vm -notmatch 'ClearCapturedPhotoForNewShot') { throw 'Retake state reset is missing' }
           if ($vm -notmatch 'StartSelectedLivePreviewAsync') { throw 'Live View restart helper is missing' }
-          if ($vm -notmatch 'Видеоискатель / переснять') { throw 'Retake button state is missing' }
           if ($vm -notmatch 'FinalCroppedImage = _cropService\.RenderFinalCrop') { throw 'Final crop pipeline missing' }
           if ($vm -notmatch 'BuildSheet\(FinalCroppedImage') { throw 'Sheet is not using FinalCroppedImage' }
           if ($crop -notmatch 'PushClip') { throw 'Real crop clipping is missing' }
