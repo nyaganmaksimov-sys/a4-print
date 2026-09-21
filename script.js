@@ -1,143 +1,15 @@
-const canvas = document.getElementById('wheelCanvas');
-const ctx = canvas.getContext('2d');
-const spinButton = document.getElementById('spinButton');
-const resultDiv = document.getElementById('result');
-
-// Настройки секторов (Цвета и призы)
-const segments = [
-    { label: '10%', description: 'Скидка 10% на этот заказ!', color: '#FF6B6B' },
-    { label: '20%', description: 'Скидка 20% на этот заказ!', color: '#4ECDC4' },
-    { label: '5 Фото', description: '+5 фото 10x15 в подарок!', color: '#45B7D1' },
-    { label: 'Ламинация', description: 'Ламинирование в подарок!', color: '#96CEB4' },
-    { label: '30% след.', description: 'Купон: 30% на следующий заказ!', color: '#FFE194' },
-    { label: 'ДЖЕКПОТ', description: '🎉 ЗАКАЗ БЕСПЛАТНО (до 500₽)! 🎉', color: '#F7D794' }
-];
-
-let currentAngle = 0; // Текущий угол поворота колеса
-let isSpinning = false;
-let spinTimeout = null;
-
-// Рисуем колесо
-function drawWheel(angle) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    const arc = (Math.PI * 2) / segments.length;
-    
-    for (let i = 0; i < segments.length; i++) {
-        const startAngle = i * arc + angle;
-        const endAngle = (i + 1) * arc + angle;
-        
-        // Рисуем сектор
-        ctx.beginPath();
-        ctx.fillStyle = segments[i].color;
-        ctx.moveTo(canvas.width / 2, canvas.height / 2);
-        ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 10, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fill();
-        
-        // Рисуем обводку
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(canvas.width / 2, canvas.height / 2);
-        ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 10, startAngle, endAngle);
-        ctx.closePath();
-        ctx.stroke();
-        
-        // Добавляем текст
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(startAngle + arc / 2);
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#000';
-        ctx.font = 'bold ' + (canvas.width / 20) + 'px "Segoe UI"';
-        ctx.fillText(segments[i].label, canvas.width / 4, 10);
-        ctx.restore();
-    }
-    
-    // Рисуем центральный круг (стрелка)
-    ctx.beginPath();
-    ctx.fillStyle = '#333';
-    ctx.arc(canvas.width / 2, canvas.height / 2, 20, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    
-    // Рисуем указатель (стрелку сверху)
-    ctx.fillStyle = '#ff0';
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2 - 15, 5);
-    ctx.lineTo(canvas.width / 2, 25);
-    ctx.lineTo(canvas.width / 2 + 15, 5);
-    ctx.fill();
-}
-
-// Функция для определения выигрыша
-function getPrize(angle) {
-    const rawAngle = angle % (Math.PI * 2); // Нормализуем угол от 0 до 2PI
-    const segmentAngle = (Math.PI * 2) / segments.length;
-    
-    // Индекс сектора (учитываем, что указатель сверху)
-    let index = Math.floor(((Math.PI * 2) - rawAngle) / segmentAngle) % segments.length;
-    
-    // Корректировка для правильного сектора (из-за точки отсчета)
-    if (rawAngle < 0.1) index = 0; 
-    
-    return segments[index];
-}
-
-// Функция вращения
-function spinWheel() {
-    if (isSpinning) return;
-    
-    isSpinning = true;
-    spinButton.disabled = true;
-    
-    const spinTime = 4000; // 4 секунды вращения
-    const spinAngle = Math.random() * 20 + 15; // Случайное число оборотов (от 15 до 35)
-    const startTime = Date.now();
-    const startAngle = currentAngle;
-    
-    function animateSpin() {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / spinTime, 1);
-        
-        // Эффект замедления (ease-out)
-        const easeProgress = 1 - Math.pow(1 - progress, 3);
-        currentAngle = startAngle + (spinAngle * Math.PI * 2) * easeProgress;
-        
-        drawWheel(currentAngle);
-        
-        if (progress < 1) {
-            spinTimeout = requestAnimationFrame(animateSpin);
-        } else {
-            // Колесо остановилось
-            isSpinning = false;
-            spinButton.disabled = false;
-            
-            // Определяем приз
-            const prize = getPrize(currentAngle);
-            resultDiv.innerHTML = `🎁 <strong>ТВОЙ ПРИЗ:</strong> ${prize.description}`;
-            resultDiv.style.background = '#d4edda';
-            resultDiv.style.border = '2px solid #28a745';
-            
-            // Сохраняем результат в localStorage, если нужно (для статистики)
-            console.log('Выигрыш:', prize.description);
-        }
-    }
-    
-    animateSpin();
-}
-
-// Инициализация
-drawWheel(currentAngle);
-
-// Слушаем клик по кнопке и по canvas (для удобства)
-spinButton.addEventListener('click', spinWheel);
-canvas.addEventListener('click', spinWheel);
-
-// Адаптивность при изменении размера окна (перерисовка)
-window.addEventListener('resize', () => {
-    drawWheel(currentAngle);
-});
+(()=>{const services=[
+['print','Каждый день','Печать и копирование','Документы, файлы, сканирование, цветная и ч/б печать разных форматов.','images/rapechatka_kv.png','распечатка печать копирование документы а4 а3 сканирование','Уточнить стоимость','tel:+79015455545'],
+['photo','Фотоуслуги','Фото на документы','Съёмка, подготовка под требования документа и печать комплекта фотографий.','images/foto_na-document_kv.png','фото документы паспорт виза удостоверение','Записываться не обязательно','tel:+79015455545'],
+['','Полиграфия','Визитки, листовки, календари','Подготовка макета, подбор материала и печать небольших или серийных тиражей.','images/tipografia_kv.png','визитки листовки календари буклеты полиграфия макет','Отправить макет','mailto:a4-print@bk.ru?subject=Полиграфия'],
+['stamps','Под заказ','Печати и штампы','Новые печати, штампы и замена клише. Поможем определить, какие данные нужны.','images/pechati_shtamp_kv.png','печати штампы ип ооо факсимиле оснастка','Заказать','tel:+79015455545'],
+['','До А0','Широкоформатная печать','Чертежи, схемы, плакаты и постеры. Цветная и монохромная печать.','images/shikoformat_kv.png','широкоформат а2 а1 а0 плакат постер чертежи','Отправить файл','mailto:a4-print@bk.ru?subject=Широкоформатная печать'],
+['','Фото','Фотопечать и сканирование','Печать фотографий популярных форматов, сканирование и подготовка изображений.','images/foto_uslugi_kv.png','фотопечать 10x15 а5 а4 а3 сканирование фотографий','Уточнить формат','tel:+79015455545'],
+['','Подарки','Сувенирная продукция','Персонализированные изделия и печать изображений для подарков и событий.','images/suvenirka_kv.png','сувениры кружки подарки нанесение фото','Обсудить идею','tel:+79015455545'],
+['','Постпечатная обработка','Ламинация и брошюровка','Защита документов, сборка презентаций, методичек, меню и других материалов.','images/laminirovanie_kv.png','ламинация брошюровка переплет документы','Уточнить формат','tel:+79015455545'],
+['','Память','Фото на памятник и фотокерамика','Подготовка фотографии, ретушь и оформление изображения для изготовления.','images/fofo_na_pamytnik_kv.png','памятник фотокерамика керамика овал табличка ретушь','Проконсультироваться','tel:+79015455545'],
+['','Архив','Оцифровка видеокассет','Перенос старых видеозаписей в современный цифровой формат для хранения и просмотра.','VIDEO','оцифровка видеокассет vhs видео архив mp4','Уточнить условия','tel:+79015455545'],
+['','Документы','Перевод документов','Поможем с переводом документов и подготовкой материалов к печати.','DOCS','перевод документов переводчик текст язык','Уточнить задачу','tel:+79015455545']];
+const cards=document.querySelector('#cards');services.forEach(s=>{const a=document.createElement('article');a.className='card';if(s[0])a.id='service-'+s[0];a.dataset.search=s[5];const media=s[4]==='VIDEO'?'<div class="art"><span>VHS</span><b>→</b><span>MP4</span></div>':s[4]==='DOCS'?'<div class="art docs"><span>А</span><b>⇄</b><span>A</span></div>':`<img src="${s[4]}" alt="${s[2]}" loading="lazy">`;a.innerHTML=media+`<div class="card-body"><small>${s[1]}</small><h3>${s[2]}</h3><p>${s[3]}</p><a href="${s[7]}">${s[6]} →</a></div>`;cards.append(a)});
+const burger=document.querySelector('.burger'),nav=document.querySelector('#nav');burger?.addEventListener('click',()=>{const x=burger.getAttribute('aria-expanded')==='true';burger.setAttribute('aria-expanded',String(!x));nav.classList.toggle('open',!x)});nav?.addEventListener('click',e=>{if(e.target.closest('a')){nav.classList.remove('open');burger.setAttribute('aria-expanded','false')}});
+const search=document.querySelector('#search'),clear=document.querySelector('#clear'),count=document.querySelector('#count'),empty=document.querySelector('#empty'),all=[...document.querySelectorAll('.card')],norm=s=>s.toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]+/gi,' ').trim();function render(){const q=norm(search.value),tokens=q?q.split(' '):[];let n=0;all.forEach(c=>{const h=norm((c.dataset.search||'')+' '+c.textContent),ok=tokens.every(t=>h.includes(t));c.hidden=!ok;if(ok)n++});count.textContent=q?'Найдено: '+n:all.length+' направлений';empty.hidden=n!==0;clear.hidden=!search.value}search.addEventListener('input',render);clear.addEventListener('click',()=>{search.value='';search.focus();render()});render();document.querySelector('#year').textContent=new Date().getFullYear()})();
