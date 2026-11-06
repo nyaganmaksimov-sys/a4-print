@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="3D‑фигурки от А4‑Принт и 3D‑ARTPRINT: готовые модели и изготовление под заказ.">
+<title>3D‑фигурки — магазин А4‑Принт</title>
+<link rel="stylesheet" href="shop.css">
+</head>
+<body>
+<header class="shop-header">
+  <div class="shop-top">
+    <div class="shell shop-top__inner">
+      <span>А4‑Принт · Москва, Щёлковское шоссе, 61</span>
+      <div><a href="tel:+79015455545">+7 (901) 545‑55‑45</a><span>•</span><a href="mailto:a4-print@bk.ru">a4-print@bk.ru</a></div>
+    </div>
+  </div>
+  <div class="shell shop-nav">
+    <a class="shop-brand" href="index.html"><img src="images/logo.png" alt="А4‑Принт"></a>
+    <nav>
+      <a href="index.html">Главная</a>
+      <a href="#catalog">Каталог</a>
+      <a href="#custom">На заказ</a>
+      <a href="#delivery">Как заказать</a>
+    </nav>
+    <button class="cart-button" id="cartOpen" type="button" aria-label="Открыть корзину">
+      <span>Корзина</span><b id="cartCount">0</b>
+    </button>
+  </div>
+</header>
+
+<main>
+<section class="shop-hero">
+  <div class="shell shop-hero__grid">
+    <div>
+      <p class="eyebrow">3D‑ARTPRINT × А4‑ПРИНТ</p>
+      <h1>3D‑фигурки, которые хочется поставить на полку</h1>
+      <p class="lead">Готовые фигурки, миниатюры и изготовление под заказ. Выберите направление, размер и цвет — мы рассчитаем стоимость перед изготовлением.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#catalog">Смотреть каталог</a>
+        <a class="btn secondary" href="#custom">Сделать свою фигурку</a>
+      </div>
+      <div class="hero-facts">
+        <div><strong>PETG / PLA</strong><span>подберём материал</span></div>
+        <div><strong>От 1 шт.</strong><span>можно заказать одну фигурку</span></div>
+        <div><strong>По вашему файлу</strong><span>или подберём модель вместе</span></div>
+      </div>
+    </div>
+    <div class="hero-showcase" aria-hidden="true">
+      <div class="hero-card hero-card--main">
+        <svg viewBox="0 0 220 220"><path d="M110 30c-22 0-40 18-40 40 0 10 4 20 10 27-19 11-32 32-32 56v22h124v-22c0-24-13-45-32-56 6-7 10-17 10-27 0-22-18-40-40-40Z"/><path d="M76 175h68l-8 22H84l-8-22Z"/></svg>
+        <div><span>ФИГУРКИ</span><strong>Готовые и под заказ</strong></div>
+      </div>
+      <div class="hero-card hero-card--small">
+        <svg viewBox="0 0 120 120"><path d="M22 70c0-20 17-36 38-36s38 16 38 36v18H22V70Z"/><path d="M41 46 29 25l22 9M79 46l12-21-22 9"/></svg>
+      </div>
+      <div class="hero-card hero-card--small">
+        <svg viewBox="0 0 120 120"><path d="M18 72h84l-10-25H30L18 72Z"/><circle cx="37" cy="76" r="10"/><circle cx="83" cy="76" r="10"/><path d="M39 47 49 33h28l9 14"/></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="category-strip">
+  <div class="shell category-strip__inner" id="categoryFilters">
+    <button class="active" data-filter="all">Все</button>
+    <button data-filter="animals">Животные</button>
+    <button data-filter="characters">Персонажи</button>
+    <button data-filter="auto">Авто / мото</button>
+    <button data-filter="miniatures">Миниатюры</button>
+    <button data-filter="custom">По фото</button>
+  </div>
+</section>
+
+<section class="section" id="catalog">
+  <div class="shell">
+    <div class="section-head">
+      <div><p class="kicker">КАТАЛОГ</p><h2>Выберите направление</h2></div>
+      <p>Сейчас это витрина категорий. Реальные фото, названия и цены можно будет заменить без переделки магазина.</p>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+</section>
+
+<section class="section custom-section" id="custom">
+  <div class="shell custom-card">
+    <div>
+      <p class="kicker light">ИНДИВИДУАЛЬНЫЙ ЗАКАЗ</p>
+      <h2>Хотите фигурку, которой нет в каталоге?</h2>
+      <p>Пришлите фото, STL/3MF или просто опишите идею. Подберём модель, размер и материал, после чего рассчитаем стоимость.</p>
+      <div class="hero-actions">
+        <a class="btn white" href="mailto:a4-print@bk.ru?subject=Индивидуальная%203D-фигурка">Отправить идею</a>
+        <a class="btn outline" href="tel:+79015455545">Позвонить</a>
+      </div>
+    </div>
+    <div class="custom-steps">
+      <div><span>01</span><strong>Идея или файл</strong><p>Фото, модель или описание.</p></div>
+      <div><span>02</span><strong>Согласование</strong><p>Размер, цвет и материал.</p></div>
+      <div><span>03</span><strong>Печать</strong><p>Запускаем после подтверждения.</p></div>
+      <div><span>04</span><strong>Получение</strong><p>Забрать в А4‑Принт.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section how-section" id="delivery">
+  <div class="shell">
+    <div class="section-head">
+      <div><p class="kicker">КАК ЗАКАЗАТЬ</p><h2>Просто и без регистрации</h2></div>
+      <p>На первом этапе заказ отправляется нам на подтверждение. Итоговую цену сообщаем после проверки выбранных параметров.</p>
+    </div>
+    <div class="how-grid">
+      <article><span>1</span><h3>Выберите фигурку</h3><p>Добавьте нужные варианты в корзину.</p></article>
+      <article><span>2</span><h3>Укажите параметры</h3><p>Размер, цвет и количество.</p></article>
+      <article><span>3</span><h3>Отправьте заказ</h3><p>Мы проверим заказ и свяжемся для подтверждения.</p></article>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="shop-footer">
+  <div class="shell shop-footer__grid">
+    <div><img src="images/logo.png" alt="А4‑Принт"><p>3D‑фигурки и печать под заказ.</p></div>
+    <div><strong>Магазин</strong><a href="#catalog">Каталог</a><a href="#custom">Индивидуальный заказ</a><a href="index.html">Вернуться на А4‑Принт</a></div>
+    <div><strong>Связаться</strong><a href="tel:+79015455545">+7 (901) 545‑55‑45</a><a href="mailto:a4-print@bk.ru">a4-print@bk.ru</a></div>
+  </div>
+</footer>
+
+<div class="cart-backdrop" id="cartBackdrop" hidden></div>
+<aside class="cart-drawer" id="cartDrawer" aria-hidden="true">
+  <div class="cart-head"><div><small>ВАШ ЗАКАЗ</small><h2>Корзина</h2></div><button id="cartClose" type="button" aria-label="Закрыть">×</button></div>
+  <div class="cart-list" id="cartList"></div>
+  <div class="cart-empty" id="cartEmpty">Корзина пока пустая.</div>
+  <div class="cart-footer">
+    <p>Итоговая стоимость рассчитывается после проверки размера, материала и модели.</p>
+    <button class="btn primary cart-submit" id="sendOrder" type="button">Отправить заказ</button>
+  </div>
+</aside>
+
+<script src="shop.js"></script>
+</body>
+</html>
